@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -127,18 +128,14 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/user/login/'
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
 
-# Directory where static files will be collected
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Directories where Django will search for additional static files
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
-# Media files (uploads by users)
+# Media files (uploaded by users)
 MEDIA_URL = '/media/'
 
-# Directory where uploaded media files will be stored
-MEDIA_ROOT = BASE_DIR / 'media'
+# Directory to store uploaded media
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
