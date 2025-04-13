@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if user.profile.role != 'admin' and user.profile.role != 'manager' %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="alert alert-danger text-center" role="alert">
+        You do not have permission to access this page.
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="container mt-5">
+    <h2>Confirm Checkout for {{ attendance.staff.first_name }} {{ attendance.staff.last_name }}</h2>
+    <p>Are you sure you want to check out this staff member?</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="time_out" class="form-label">Time Out</label>
+        <input type="time" class="form-control" name="time_out" id="time_out" value="{{ current_time }}" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label for="date_out" class="form-label">Date Out</label>
+        <input type="date" class="form-control" name="date_out" id="date_out" value="{{ current_date }}" readonly>
+      </div>
+
+      <div class="text-end">
+        <button type="submit" class="btn btn-primary">Confirm Checkout</button>
+      </div>
+    </form>
+  </div>
+
+  {% endif %}
+  {% endblock %}
