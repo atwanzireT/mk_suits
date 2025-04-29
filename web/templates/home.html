@@ -2,810 +2,121 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HotelPro Management System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <!-- Bootstrap & Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <style>
         :root {
-            --primary-color: #00b8d4;
-            /* Cyan */
-            --secondary-color: #4fc3f7;
-            /* Sky Blue */
-            --dark-cyan: #008ba3;
-            --light-sky: #b3e5fc;
-            --dark-blue: #002f36;
-            --light-bg: #f8fdff;
+            --primary-blue: #0d6efd;
+            --hover-blue: #0a58ca;
+            --background-gradient: linear-gradient(135deg, #0d6efd, rgba(0, 139, 163, 0.9));
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
+            margin: 0;
+            height: 100vh;
+            background-color: #f0f8ff;
+            overflow: hidden;
+        }
+
+        .welcome-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background-gradient), 
+                        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') 
+                        center/cover no-repeat;
+        }
+
+        .welcome-card {
+            background-color: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .logo {
+            font-size: 2.75rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        .welcome-card h2 {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .welcome-card p.lead {
+            font-size: 1.25rem;
             color: #333;
         }
 
-        .navbar-custom {
-            background-color: var(--primary-color);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 15px 0;
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            padding: 12px 30px;
+            font-weight: 600;
+            font-size: 1rem;
         }
 
         .btn-primary:hover {
-            background-color: var(--dark-cyan);
-            border-color: var(--dark-cyan);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .text-primary {
-            color: var(--primary-color) !important;
-        }
-
-        .hero-section {
-            background: linear-gradient(135deg, rgba(0, 184, 212, 0.8), rgba(0, 139, 163, 0.9)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat;
-            height: 500px;
-            color: white;
-            display: flex;
-            align-items: center;
-        }
-
-        .hero-content {
-            max-width: 700px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .hero-section h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .hero-section p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .feature-card {
-            transition: all 0.3s ease;
-            height: 100%;
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            position: relative;
-            background: white;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 184, 212, 0.2);
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            background: rgba(79, 195, 247, 0.1);
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
-        }
-
-        .bg-light-custom {
-            background-color: var(--light-bg);
-        }
-
-        .footer-custom {
-            background-color: var(--dark-blue);
-            color: white;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            padding: 8px 15px !important;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-        }
-
-        .nav-link:hover {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .benefit-card {
-            border-left: 4px solid var(--secondary-color);
-            transition: all 0.3s ease;
-            height: 100%;
-            border-radius: 8px;
-        }
-
-        .benefit-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .login-btn {
-            background-color: white;
-            color: var(--primary-color);
-            font-weight: 600;
-            padding: 8px 20px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .login-btn:hover {
-            background-color: #f0f0f0;
-            color: var(--dark-cyan);
-            transform: translateY(-2px);
-        }
-
-        .testimonial {
-            font-style: italic;
-            border-left: 3px solid var(--secondary-color);
-            padding-left: 20px;
-            font-size: 1.1rem;
-            line-height: 1.8;
-        }
-
-        .counter-box {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .counter-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 184, 212, 0.15);
-        }
-
-        .counter-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .counter-text {
-            font-weight: 500;
-            color: #555;
-        }
-
-        .section-title {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 3px;
-        }
-
-        .testimonial-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .testimonial-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 184, 212, 0.15);
-        }
-
-        .client-img {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--secondary-color);
-        }
-
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-cyan));
-            padding: 80px 0;
-            color: white;
-        }
-
-        .newsletter-input {
-            border: none;
-            padding: 12px 15px;
-            border-radius: 6px 0 0 6px;
-        }
-
-        .newsletter-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 0 6px 6px 0;
-            font-weight: 500;
-        }
-
-        .footer-link {
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-
-        .footer-link:hover {
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .social-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .social-icon:hover {
-            background: var(--primary-color);
-            transform: translateY(-3px);
-        }
-
-        /* Animation classes */
-        .fade-in {
-            animation: fadeIn 1s ease-in;
+            background-color: var(--hover-blue);
+            border-color: var(--hover-blue);
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
+                transform: translateY(20px);
             }
 
             to {
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .hero-section {
-                height: 400px;
+            .welcome-card {
+                padding: 30px 20px;
             }
 
-            .hero-section h1 {
-                font-size: 2.2rem;
-            }
-
-            .hero-section p {
-                font-size: 1.1rem;
-            }
-
-            .section-title::after {
-                left: 50%;
-                transform: translateX(-50%);
+            .logo {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 
-<body class="bg-white">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-hotel me-2"></i>
-                HotelPro
+<body>
+
+    <div class="welcome-container">
+        <div class="welcome-card">
+            <div class="logo">
+                <i class="fas fa-hotel me-2"></i>HotelPro
+            </div>
+            <h2 class="mb-3">Welcome to HotelPro</h2>
+            <p class="lead mb-4">Your complete hotel management solution</p>
+            <p>Streamline operations, enhance guest experiences, and elevate performance with our all-in-one platform designed for modern hotels.</p>
+            <a href="/manager/" class="btn btn-primary mt-4">
+                <i class="fas fa-sign-in-alt me-2"></i>Get Started
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#features">Features</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#benefits">Benefits</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#testimonials">Testimonials</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contact</a>
-                    </li>
-                </ul>
-                <div class="d-flex">
-                    <a href="/manager/" class="btn login-btn me-2">
-                        <i class="fas fa-sign-in-alt me-1"></i> Get Started
-                    </a>
-                    <a href="#" class="btn btn-outline-light">
-                        <i class="fas fa-phone-alt me-1"></i> Contact
-                    </a>
-                </div>
-            </div>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content animate__animated animate__fadeIn">
-                <h1 class="animate__animated animate__fadeInDown">Transform Your Hotel Management</h1>
-                <p class="animate__animated animate__fadeIn animate__delay-1s">The most powerful all-in-one solution for
-                    hotels of all sizes. Streamline operations, enhance guest experiences, and boost revenue.</p>
-                <div class="animate__animated animate__fadeIn animate__delay-2s">
-                    <button class="btn btn-primary btn-lg me-3">
-                        <i class="fas fa-play-circle me-2"></i>Watch Demo
-                    </button>
-                    <button class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-calendar me-2"></i>Schedule a Demo
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="py-5 bg-light-custom">
-        <div class="container">
-            <div class="row g-4 text-center">
-                <div class="col-md-3 animate__animated animate__fadeIn">
-                    <div class="counter-box">
-                        <div class="counter-number">10+</div>
-                        <div class="counter-text">Hotels Worldwide</div>
-                    </div>
-                </div>
-                <div class="col-md-3 animate__animated animate__fadeIn animate__delay-1s">
-                    <div class="counter-box">
-                        <div class="counter-number">32%</div>
-                        <div class="counter-text">Average Revenue Increase</div>
-                    </div>
-                </div>
-                <div class="col-md-3 animate__animated animate__fadeIn animate__delay-2s">
-                    <div class="counter-box">
-                        <div class="counter-number">45%</div>
-                        <div class="counter-text">Staff Time Saved</div>
-                    </div>
-                </div>
-                <div class="col-md-3 animate__animated animate__fadeIn animate__delay-3s">
-                    <div class="counter-box">
-                        <div class="counter-number">99.9%</div>
-                        <div class="counter-text">System Uptime</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Features -->
-    <section class="py-5" id="features">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Comprehensive Hotel Management</h2>
-                <p class="lead">Everything you need to run your hotel efficiently in one powerful platform</p>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-4 animate__animated animate__fadeInUp">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                            <h4 class="card-title">Smart Reservation System</h4>
-                            <p class="card-text">Maximize occupancy with our intelligent booking engine. Prevent
-                                double-bookings and optimize room assignments automatically.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Learn More <i
-                                    class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-1s">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="fas fa-door-open"></i>
-                            </div>
-                            <h4 class="card-title">Real-time Room Management</h4>
-                            <p class="card-text">Monitor room status, cleaning schedules, and maintenance needs from any
-                                device. Instant updates for your entire staff.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Learn More <i
-                                    class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-2s">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h4 class="card-title">Guest Relationship Management</h4>
-                            <p class="card-text">Build loyal customers with personalized experiences. Track preferences,
-                                spending habits, and special requests.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Learn More <i
-                                    class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 animate__animated animate__fadeInUp">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="fas fa-credit-card"></i>
-                            </div>
-                            <h4 class="card-title">Automated Billing System</h4>
-                            <p class="card-text">Process payments seamlessly with integrated payment gateways. Generate
-                                professional invoices with just one click.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Learn More <i
-                                    class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-1s">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <h4 class="card-title">Advanced Analytics</h4>
-                            <p class="card-text">Make data-driven decisions with comprehensive reporting. Visualize
-                                trends, forecast demand, and identify revenue opportunities.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Learn More <i
-                                    class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-2s">
-                    <div class="card feature-card h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="fas fa-mobile-alt"></i>
-                            </div>
-                            <h4 class="card-title">Mobile Accessibility</h4>
-                            <p class="card-text">Manage your hotel from anywhere with our responsive mobile interface.
-                                Full functionality on any device.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary mt-3">Learn More <i
-                                    class="fas fa-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Benefits Section -->
-    <section class="py-5 bg-light-custom" id="benefits">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">Why Choose HotelPro?</h2>
-                <p class="lead">Discover how our solution can transform your hotel operations</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-6 animate__animated animate__fadeInLeft">
-                    <div class="card benefit-card h-100">
-                        <div class="card-body p-4">
-                            <h4><i class="fas fa-clock text-primary me-2"></i> Save Time</h4>
-                            <p class="mb-0">Automate repetitive tasks and reduce administrative work by up to 45%. Your
-                                staff can focus on what matters most - delivering exceptional guest experiences.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 animate__animated animate__fadeInRight">
-                    <div class="card benefit-card h-100">
-                        <div class="card-body p-4">
-                            <h4><i class="fas fa-dollar-sign text-primary me-2"></i> Boost Revenue</h4>
-                            <p class="mb-0">Our clients see an average 32% increase in revenue through optimized pricing
-                                strategies, improved occupancy rates, and enhanced upselling opportunities.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 animate__animated animate__fadeInLeft">
-                    <div class="card benefit-card h-100">
-                        <div class="card-body p-4">
-                            <h4><i class="fas fa-smile text-primary me-2"></i> Enhance Guest Satisfaction</h4>
-                            <p class="mb-0">Deliver seamless check-ins, personalized service, and quick response to
-                                requests. Our system helps increase guest satisfaction scores by an average of 27%.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 animate__animated animate__fadeInRight">
-                    <div class="card benefit-card h-100">
-                        <div class="card-body p-4">
-                            <h4><i class="fas fa-shield-alt text-primary me-2"></i> Enterprise-Grade Security</h4>
-                            <p class="mb-0">Protect your business and guest data with bank-level encryption, regular
-                                security audits, and compliance with global data protection regulations.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials -->
-    <!-- <section class="py-5" id="testimonials">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="section-title">What Our Clients Say</h2>
-                <p class="lead">Hear from hoteliers who transformed their business with HotelPro</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-6 animate__animated animate__fadeIn">
-                    <div class="card testimonial-card h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://cdn-icons-png.flaticon.com/512/4128/4128176.png" alt="Nakato Kintu"
-                                    class="client-img me-3">
-                                <div>
-                                    <h5 class="mb-0">Nakato Kintu</h5>
-                                    <p class="text-muted mb-0">Manager, Kampala Serena Hotel</p>
-                                </div>
-                            </div>
-                            <p class="testimonial">HotelPro has revolutionized our operations at Serena. The automated
-                                billing system alone has reduced our accounting time by 40%. Guest satisfaction scores
-                                have never been higher!</p>
-                            <div class="text-primary">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 animate__animated animate__fadeIn animate__delay-1s">
-                    <div class="card testimonial-card h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://cdn-icons-png.flaticon.com/512/4128/4128346.png"
-                                    alt="Mugisha Tumusiime" class="client-img me-3">
-                                <div>
-                                    <h5 class="mb-0">Mugisha Tumusiime</h5>
-                                    <p class="text-muted mb-0">Owner, Pearl of Africa Resort</p>
-                                </div>
-                            </div>
-                            <p class="testimonial">Since implementing HotelPro, our occupancy rates increased by 28% in
-                                just 3 months. The real-time room management features help our staff work more
-                                efficiently.</p>
-                            <div class="text-primary">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 animate__animated animate__fadeIn">
-                    <div class="card testimonial-card h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://cdn-icons-png.flaticon.com/512/4128/4128343.png" alt="Kato Muwanga"
-                                    class="client-img me-3">
-                                <div>
-                                    <h5 class="mb-0">Kato Muwanga</h5>
-                                    <p class="text-muted mb-0">Director, Speke Resort Munyonyo</p>
-                                </div>
-                            </div>
-                            <p class="testimonial">The analytics dashboard has transformed how we make decisions. We can
-                                now identify our most profitable services and adjust pricing dynamically. Game changer!
-                            </p>
-                            <div class="text-primary">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 animate__animated animate__fadeIn animate__delay-1s">
-                    <div class="card testimonial-card h-100">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://cdn-icons-png.flaticon.com/512/4128/4128178.png"
-                                    alt="Namukasa Nalwoga" class="client-img me-3">
-                                <div>
-                                    <h5 class="mb-0">Namukasa Nalwoga</h5>
-                                    <p class="text-muted mb-0">CEO, Protea Hotel Entebbe</p>
-                                </div>
-                            </div>
-                            <p class="testimonial">Our staff love the mobile accessibility - they can manage
-                                reservations and guest requests from anywhere on property. Guest complaints have reduced
-                                by 65% since implementation.</p>
-                            <div class="text-primary">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="text-center mt-4">
-                <a href="#" class="btn btn-outline-primary">Read More Testimonials <i
-                        class="fas fa-arrow-right ms-1"></i></a>
-            </div>
-        </div>
-    </section> -->
-
-    <!-- CTA Section -->
-    <section class="cta-section" id="contact">
-        <div class="container text-center">
-            <h2 class="mb-4 animate__animated animate__fadeIn">Ready to Transform Your Hotel Management?</h2>
-            <p class="lead mb-5 animate__animated animate__fadeIn animate__delay-1s">Join over 500 hotels worldwide that
-                trust HotelPro</p>
-            <div class="animate__animated animate__fadeIn animate__delay-2s">
-                <button class="btn btn-light btn-lg me-3 px-4">
-                    <i class="fas fa-calendar-alt me-2"></i>Schedule a Demo
-                </button>
-                <button class="btn btn-outline-light btn-lg px-4">
-                    <i class="fas fa-envelope me-2"></i>Contact Sales
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer-custom text-white py-5">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <h4 class="mb-3"><i class="fas fa-hotel me-2"></i>HotelPro</h4>
-                    <p class="small">The complete hotel management solution that helps you deliver exceptional guest
-                        experiences while maximizing efficiency and revenue.</p>
-                    <div class="mt-3">
-                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <h5 class="mb-3">Product</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="footer-link">Features</a></li>
-                        <li><a href="#" class="footer-link">Pricing</a></li>
-                        <li><a href="#" class="footer-link">Demo</a></li>
-                        <li><a href="#" class="footer-link">Updates</a></li>
-                        <li><a href="#" class="footer-link">Roadmap</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <h5 class="mb-3">Company</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="footer-link">About</a></li>
-                        <li><a href="#" class="footer-link">Careers</a></li>
-                        <li><a href="#" class="footer-link">Testimonials</a></li>
-                        <li><a href="#" class="footer-link">Contact</a></li>
-                        <li><a href="#" class="footer-link">Partners</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4 col-md-4">
-                    <h5 class="mb-3">Subscribe to Our Newsletter</h5>
-                    <p class="small">Get the latest news and updates delivered to your inbox.</p>
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control newsletter-input" placeholder="Your email">
-                        <button class="btn newsletter-btn" type="button">Subscribe</button>
-                    </div>
-                </div>
-            </div>
-            <hr class="my-4 bg-light opacity-10">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="small mb-0">© 2025 HotelPro. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="#" class="small text-white text-decoration-none me-3">Privacy Policy</a>
-                    <a href="#" class="small text-white text-decoration-none me-3">Terms of Service</a>
-                    <a href="#" class="small text-white text-decoration-none">Cookie Policy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Add smooth scrolling to all links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-
-        // Add animation on scroll
-        document.addEventListener('DOMContentLoaded', function () {
-            const animateElements = document.querySelectorAll('.animate__animated');
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add(entry.target.dataset.animate);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.1
-            });
-
-            animateElements.forEach(element => {
-                observer.observe(element);
-            });
-        });
-    </script>
 </body>
 
 </html>

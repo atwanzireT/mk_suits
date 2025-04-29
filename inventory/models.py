@@ -88,53 +88,58 @@ class OrderTransaction(models.Model):
 
 
 
+from decimal import Decimal, InvalidOperation
+from django.db import models
+
 class OrderItem(models.Model):
     ORDER_TYPE_CHOICES = [
         ('Dine-In', 'Dine-In'),
         ('Take-Away', 'Take-Away'),
     ]
-    
+
     SPECIAL_NOTES_CHOICES = [
-        ('strongly spiced', 'strongly spiced'),
-        ('midly spiced', 'midly spiced'),
-       ( 'chips' , 'chips'),
-       ('rice','rice'),
-        ('posho', 'posho'),
-       ( 'rice_posho','rice_posho' ),
-        ('chips_rice', 'chips_rice'),
-       ( 'rice_posho', 'rice_posho'),
-        ('chips_posho', 'chips_posho')
+        ('nothing', 'Nothing'),
+        ('strongly spiced', 'Strongly Spiced'),
+        ('midly spiced', 'Mildly Spiced'),
+        ('chips', 'Chips'),
+        ('rice', 'Rice'),
+        ('posho', 'Posho'),
+        ('rice_posho', 'Rice + Posho'),
+        ('chips_rice', 'Chips + Rice'),
+        ('chips_posho', 'Chips + Posho'),
     ]
-    order = models.ForeignKey(OrderTransaction, on_delete=models.CASCADE, related_name='order_items')
-    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, null=True, blank=True)
+
+    order = models.ForeignKey('OrderTransaction', on_delete=models.CASCADE, related_name='order_items')
+    menu_item = models.ForeignKey('MenuItem', on_delete=models.CASCADE, null=True, blank=True)
     order_date = models.DateTimeField(auto_now_add=True)
     customer_name = models.CharField(max_length=255, blank=True, null=True, default="Customer")
-    dining_area = models.ForeignKey(DiningArea, on_delete=models.SET_NULL, null=True, blank=True)
-    table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True, blank=True)
-    total_price =  models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    dining_area = models.ForeignKey('DiningArea', on_delete=models.SET_NULL, null=True, blank=True)
+    table = models.ForeignKey('Table', on_delete=models.SET_NULL, null=True, blank=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     quantity = models.IntegerField(blank=True, null=True)
     status = models.CharField(
-        max_length=50, default='Pending',
-        choices=[('Pending', 'Pending'), ('Preparing', 'Preparing'), ('Cooked', 'Completed'), ('Served', 'Served'), ('Cancelled', 'Cancelled')]
+        max_length=50,
+        choices=[('Pending', 'Pending'), ('Preparing', 'Preparing'), ('Cooked', 'Completed'), ('Served', 'Served'), ('Cancelled', 'Cancelled')],
+        default='Pending'
     )
     special_notes = models.CharField(
+        max_length=50,
+        choices=SPECIAL_NOTES_CHOICES,
         default="nothing",
-        max_length=50, blank=True, null=True,
-        choices=SPECIAL_NOTES_CHOICES
-        )
+        blank=True,
+        null=True
+    )
     order_type = models.CharField(
         max_length=10,
         choices=ORDER_TYPE_CHOICES,
         default='Dine-In'
     )
     updated = models.DateField(auto_now=True, blank=True, null=True)
-    
+
     def save(self, *args, **kwargs):
         if self.menu_item and self.quantity:
             try:
                 price = Decimal(self.menu_item.price or 0)
-                # price = self.menu_item.price
-                print(f'The price is {price}')
             except (InvalidOperation, TypeError):
                 price = Decimal('0.00')
 
@@ -145,10 +150,9 @@ class OrderItem(models.Model):
 
             self.total_price = price * quantity
         else:
-            self.total_price = total_price
+            self.total_price = Decimal('0.00')  # Fix here
 
         super().save(*args, **kwargs)
-
 
     class Meta:
         verbose_name = 'Order Item'
@@ -157,6 +161,3 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"OrderItem {self.id} for Order {self.order.id}"
-
-
-
