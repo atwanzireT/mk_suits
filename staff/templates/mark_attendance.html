@@ -12,7 +12,7 @@
     </div>
     {% else %}
     <div class="container mt-5">
-        <h2>Mark Attendance for {{ today|date:"Y-m-d" }}</h2>
+        <h2>Record Staff Attendance for {{ today|date:"Y-m-d" }}</h2>
 
         <form method="post" class="mt-3">
             {% csrf_token %}

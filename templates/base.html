@@ -8,6 +8,131 @@
     <title>Hotel Manager</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'assets/images/logos/seodashlogo.png' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/styles.min.css' %}" />
+
+    <style>
+        :root {
+            --primary-color: #2A6EBB;
+            --secondary-color: #F8F9FA;
+            --accent-color: #FFD700;
+            --text-color: #333333;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        .page-wrapper {
+            background-color: #f5f7fa;
+        }
+
+        .left-sidebar {
+            background-color: #ffffff;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .sidebar-nav .sidebar-item .sidebar-link {
+            color: var(--text-color);
+            font-weight: 500;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            margin: 0.25rem 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-nav .sidebar-item .sidebar-link:hover {
+            background-color: rgba(42, 110, 187, 0.1);
+            color: var(--primary-color);
+        }
+
+        .sidebar-nav .sidebar-item .sidebar-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .app-header {
+            background-color: #ffffff;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .brand-logo {
+            padding: 1rem;
+        }
+
+        .nav-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .card {
+            border-radius: 0.75rem;
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .module-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-color);
+        }
+
+        .hotel-name {
+            font-weight: 600;
+            margin-left: 0.5rem;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .user-info {
+            margin-left: 0.75rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .logout-btn {
+            margin-top: 1rem;
+            width: 100%;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,40 +143,44 @@
         <aside class="left-sidebar">
             <!-- Sidebar scroll-->
             <div>
-                <div class="brand-logo d-flex align-items-center justify-content-between">
-                    <a href="/" class="text-nowrap logo-img">
-                        <img style="width: 80px; margin: 10px;" src="{% static 'assets/images/logos/hotel.png' %}"
-                            alt="" />
+                <div class="brand-logo d-flex align-items-center justify-content-between p-3">
+                    <a href="/" class="text-nowrap logo-img d-flex align-items-center">
+                        <img style="width: 50px;" src="{% static 'assets/images/logos/hotel.png' %}" alt="Hotel Logo" />
+                        <span class="hotel-name">HotelPro</span>
                     </a>
                     <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
                     </div>
                 </div>
-                <!-- Sidebar navigation-->
-                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-                    <ul id="sidebarnav">
 
+                <!-- User Profile Section -->
+                <div class="user-profile border-bottom pb-3">
+                    <div class="d-flex align-items-center">
+                        <img src="{% static 'assets/images/profile/user-1.jpg' %}" alt="User Profile" width="45"
+                            height="45" class="rounded-circle">
+                        <div class="user-info">
+                            <h6 class="user-name mb-0">{{ user.get_full_name }}</h6>
+                            <p class="user-role mb-0">Hotel Manager</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar navigation-->
+                <nav class="sidebar-nav scroll-sidebar mt-3" data-simplebar="">
+                    <ul id="sidebarnav">
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/manager/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:layout-dashboard" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Dashboard</span>
                             </a>
                         </li>
-                        <!-- 
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="/manager/menu/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
-                                </span>
-                                <span class="hide-menu">Menu</span>
-                            </a>
-                        </li> -->
+
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/manager/orders/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:shopping-cart" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Orders</span>
                             </a>
@@ -59,36 +188,17 @@
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/kitchen/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:utensils" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Kitchen</span>
                             </a>
                         </li>
 
-
-                        <!-- <li class="sidebar-item">
-                            <a class="sidebar-link" href="/manager/add-order/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
-                                </span>
-                                <span class="hide-menu">Place Order</span>
-                            </a>
-                        </li> -->
-                        <!-- 
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="/manager/roomtypes/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
-                                </span>
-                                <span class="hide-menu">Rooms</span>
-                            </a>
-                        </li> -->
-
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/room_bookings/reservations/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:calendar" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Reservations</span>
                             </a>
@@ -96,17 +206,21 @@
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/room_bookings/sauna_customers/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:activity" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
-                                <span class="hide-menu">SaunaCustomers</span>
+                                <span class="hide-menu">Sauna Customers</span>
                             </a>
+                        </li>
+
+                        <li class="nav-small-cap">
+                            <span class="hide-menu text-uppercase fw-bold text-muted">Staff Management</span>
                         </li>
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/staffing/staff/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:users" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Staff</span>
                             </a>
@@ -114,37 +228,42 @@
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/staffing/attendance/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:clipboard-list" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
-                                <span class="hide-menu">Staff Attendance List</span>
+                                <span class="hide-menu">Attendance List</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/staffing/attendance/mark/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:clipboard-check" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
-                                <span class="hide-menu">Staff Attendance Register</span>
+                                <span class="hide-menu">Attendance Register</span>
                             </a>
+                        </li>
+
+                        <li class="nav-small-cap">
+                            <span class="hide-menu text-uppercase fw-bold text-muted">Analytics</span>
                         </li>
 
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/manager/reports/" aria-expanded="false">
-                                <span>
-                                    <iconify-icon icon="solar:map-arrow-right-bold" class="fs-6"></iconify-icon>
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:bar-chart-2" style="color: #2A6EBB;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Reports</span>
                             </a>
                         </li>
-
-                        <form action="" method="post">
-                            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
-                        </form>
-
-
                     </ul>
+
+                    <div class="mt-3 mx-3">
+                        <a href="{% url 'logout' %}"
+                            class="btn btn-danger logout-btn d-flex align-items-center justify-content-center">
+                            <iconify-icon icon="lucide:log-out" class="me-2"></iconify-icon> Logout
+                        </a>
+                    </div>
                 </nav>
                 <!-- End Sidebar navigation -->
             </div>
@@ -160,22 +279,22 @@
                         <li class="nav-item d-block d-xl-none">
                             <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse"
                                 href="javascript:void(0)">
-                                <i class="ti ti-menu-2"></i>
+                                <iconify-icon icon="lucide:menu" style="font-size: 1.25rem;"></iconify-icon>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <!-- <a class="nav-link nav-icon-hover" href="javascript:void(0)">
-                                <i class="ti ti-bell-ringing"></i>
-                                <div class="notification bg-primary rounded-circle"></div>
-                            </a> -->
+                        <li class="nav-item d-none d-md-block">
+                            <div class="d-flex align-items-center">
+                                <iconify-icon icon="lucide:calendar"
+                                    style="color: #6c757d; margin-right: 10px;"></iconify-icon>
+                                <span id="currentDate" class="header-text"></span>
+                            </div>
                         </li>
                     </ul>
                     <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
                         <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                            <!-- <a href="#" target="_blank"
-                      class="btn btn-primary me-2"><span class="d-none d-md-block">Check Pro Version</span> <span class="d-block d-md-none">Pro</span></a>
-                    <a href="#" target="_blank"
-                      class="btn btn-success"><span class="d-none d-md-block">Download Free </span> <span class="d-block d-md-none">Free</span></a> -->
+                            <li class="nav-item">
+                                <a href="/manager/add-order/" class="btn btn-md btn-primary">Create Order</a>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2"
                                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -185,23 +304,28 @@
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
                                     aria-labelledby="drop2">
                                     <div class="message-body">
-                                        <!-- <a href="javascript:void(0)"
-                                            class="d-flex align-items-center gap-2 dropdown-item">
-                                            <i class="ti ti-user fs-6"></i>
+                                        <div class="profile-dropdown-header">
+                                            <img src="{% static 'assets/images/profile/user-1.jpg' %}" alt="" width="40"
+                                                height="40" class="rounded-circle">
+                                            <div class="profile-info">
+                                                <h6 class="profile-name">{{ user.get_full_name }}</h6>
+                                                <p class="profile-role">Hotel Manager</p>
+                                            </div>
+                                        </div>
+                                        <a href="javascript:void(0)" class="d-flex align-items-center dropdown-item">
+                                            <iconify-icon icon="lucide:user" style="color: #5d87ff;"
+                                                class="fs-6"></iconify-icon>
                                             <p class="mb-0 fs-3">My Profile</p>
-                                        </a> -->
-                                        <a href="javascript:void(0)"
-                                            class="d-flex align-items-center gap-2 dropdown-item">
-                                            <i class="ti ti-mail fs-6"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" class="d-flex align-items-center dropdown-item">
+                                            <iconify-icon icon="lucide:settings" style="color: #5d87ff;"
+                                                class="fs-6"></iconify-icon>
                                             <p class="mb-0 fs-3">My Account</p>
                                         </a>
-                                        <!-- <a href="javascript:void(0)"
-                                            class="d-flex align-items-center gap-2 dropdown-item">
-                                            <i class="ti ti-list-check fs-6"></i>
-                                            <p class="mb-0 fs-3">My Task</p>
-                                        </a> -->
                                         <a href="{% url 'logout' %}"
-                                            class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                                            class="btn btn-outline-primary w-100 mt-3 d-flex align-items-center justify-content-center">
+                                            <iconify-icon icon="lucide:log-out" class="me-2"></iconify-icon> Logout
+                                        </a>
                                     </div>
                                 </div>
                             </li>
@@ -210,6 +334,8 @@
                 </nav>
             </header>
             <!--  Header End -->
+
+
             <div class="container-fluid">
                 {% block content %}
 
@@ -226,6 +352,19 @@
     <script src="{% static 'assets/js/app.min.js' %}"></script>
     <script src="{% static 'assets/js/dashboard.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+
+    <!-- Add this JavaScript at the end of your body to update the current date -->
+    <script>
+        // Display current date in header
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentDateEl = document.getElementById('currentDate');
+            if (currentDateEl) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const today = new Date();
+                currentDateEl.textContent = today.toLocaleDateString('en-US', options);
+            }
+        });
+    </script>
 </body>
 
 </html>

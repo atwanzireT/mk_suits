@@ -8,6 +8,7 @@ from .views import (
     CategoryViewSet,
     MenuItemViewSet,
     CurrentUserViewSet,
+    DashboardStatsView,
 )
 
 router = DefaultRouter()
@@ -21,4 +22,5 @@ router.register(r'menu-items', MenuItemViewSet, basename='menu-items')
 urlpatterns = [
     path('', include(router.urls)),
     path('current-user/', CurrentUserViewSet.as_view(), name='current-user'),
+    path('dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
 ]

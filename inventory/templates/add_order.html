@@ -1,117 +1,136 @@
 {% extends 'base.html' %} {% load static %} {% block extra_css %}
-<link
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-  rel="stylesheet"
-/>
-<link
-  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css"
-  rel="stylesheet"
-/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
 <style>
   body {
     background: linear-gradient(to bottom right, #e0e7ff, #c7d2fe);
     min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
   }
+
   .card {
-    background-color: rgba(255, 255, 255, 0.8);
-
+    background-color: rgba(255, 255, 255, 0.9);
     border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
   }
-  .category-card {
-    transition: all 0.3s ease;
-  }
-  .category-card:hover {
-    transform: scale(1.05);
-  }
-  .category-card.selected {
-    background-color: #4f46e5;
-    color: white;
-  }
-  .menu-item-card {
-    background-color: #eef2ff;
-  }
-  .quantity-input {
-    width: 60px;
-    text-align: center;
 
+  .card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   }
-  .card-body{
-    
-  }
+
   .card-header {
     background-color: #4f46e5;
     color: white;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+
+  .category-card {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    padding: 1rem;
+    border: none;
+  }
+
+  .category-card:hover {
+    transform: translateY(-3px);
+    background-color: #6366f1;
+    color: #fff;
+  }
+
+  .category-card.selected {
+    background-color: #4338ca;
+    color: white;
+  }
+
+  .menu-item-card {
+    background-color: #eef2ff;
+    border-radius: 0.75rem;
+  }
+
+  .quantity-input {
+    width: 70px;
+    text-align: center;
+    border-radius: 0.5rem;
+  }
+
+  #menu-search {
+    border-radius: 0.5rem;
+  }
+
+  #submit-orders {
+    width: 100%;
+    padding: 0.75rem;
+    font-weight: 500;
+  }
+
+  #selected-items-container {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
   }
 </style>
+
 {% endblock %} {% block content %}
 <div class="container">
- 
 
-    <div class="row">
-        <form method="post" class="d-flex align-items-center me-2">
-            {% csrf_token %}
-            <div class="d-flex align-items-center me-2">{{ form.as_p }}</div>
-            <button type="submit" class="btn btn-primary btn-sm w-auto">Submit</button>
-        </form>
+
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <form method="post" class="d-flex align-items-center gap-2 flex-wrap">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+      </form>
     </div>
-   
+  </div>
+
+
   <div class="row">
     <div class="col-lg-8">
       <!-- Select Unpaid Order Transaction -->
-       
-  
-    <select id="order-transaction-select" class="form-control">
+      <select id="order-transaction-select" class="form-control my-3">
         <option value="">Select Transaction </option>
         {% for transaction in unpaid_orders %}
         <option value="{{ transaction.random_id }}">{{ transaction.random_id }} /{{transaction.table}}</option>
         {% endfor %}
-    </select>
+      </select>
       <div class="card mb-4">
-
-
         </select>
         <div class="card-header">
           <h5 class="card-title mb-0">Menu Selection</h5>
         </div>
         <div class="card-body">
-          <div
-            class="d-flex flex-wrap gap-2"
-            id="category-container"
-          >
+          <div class="d-flex flex-wrap gap-2" id="category-container">
             {% for category in categories %}
             <div id="" class="">
-             <button
-                class="btn btn btn-outline-primary category-card w-100 rounded align-items-center justify-content-center "
-                data-category="{{ category.id }}"
-              >
+              <button
+                class="btn btn-outline-primary category-card w-100 rounded text-center d-flex flex-column justify-content-center align-items-center"
+                data-category="{{ category.id }}">
                 <i class="bi bi-{{ category.icon }} fs-3 mb-2"></i>
                 <span>{{ category.name }}</span>
               </button>
+
             </div>
             {% endfor %}
           </div>
-          
+
         </div>
       </div>
 
-          <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Menu Items</h5>
-            <input
-              type="text"
-              id="menu-search"
-              class="form-control form-control-sm"
-              placeholder="Search..."
-              style="max-width: 200px;"
-            />
-          </div>
-          <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4" id="menu-items-container">
-              <!-- Menu items will be dynamically added here -->
-            </div>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Menu Items</h5>
+          <input type="text" id="menu-search" class="form-control form-control-sm" placeholder="Search..."
+            style="max-width: 200px;" />
+        </div>
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4" id="menu-items-container">
+            <!-- Menu items will be dynamically added here -->
           </div>
         </div>
+      </div>
     </div>
 
     <div class="col-lg-4">
@@ -123,11 +142,7 @@
           <form id="order-form" method="post">
             {% csrf_token %}
             {% for transaction in unpaid_orders %}
-            <input
-              type="hidden"
-              id="order-id"
-              value="{{ transaction.random_id }}"
-            />
+            <input type="hidden" id="order-id" value="{{ transaction.random_id }}" />
             {% endfor %}
 
             <!-- <div class="mb-3">
@@ -162,9 +177,7 @@
             </div>
 
             <div class="mb-3">
-              <label for="special-notes" class="form-label"
-                >Special Notes</label
-              >
+              <label for="special-notes" class="form-label">Special Notes</label>
               <select id="special-notes" class="form-select">
                 <option value="nothing">Nothing</option>
                 <option value="strongly spiced">Strongly spiced</option>
@@ -198,24 +211,24 @@
     </div>
   </div>
 </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script type="text/javascript">
-    function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== "") {
-    let cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      let cookie = cookies[i].trim();
-      if (cookie.startsWith(name + "=")) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      let cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
       }
     }
+    return cookieValue;
   }
-  return cookieValue;
-}
 
-document.getElementById("menu-search").addEventListener("input", function () {
+  document.getElementById("menu-search").addEventListener("input", function () {
     let filter = this.value.toLowerCase().trim();
     let items = document.querySelectorAll("#menu-items-container .menu-item");
 
@@ -225,29 +238,29 @@ document.getElementById("menu-search").addEventListener("input", function () {
     });
   });
 
-$(document).ready(function () {
-  let selectedItems = {}; // Store selected items across categories
-  let currentOrderId = $("#order-id").val(); // Ensure order ID persists
+  $(document).ready(function () {
+    let selectedItems = {}; // Store selected items across categories
+    let currentOrderId = $("#order-id").val(); // Ensure order ID persists
 
 
     // Update the order ID when a different transaction is selected
-  $("#order-transaction-select").change(function () {
-    currentOrderId = $(this).val();
-    $("#order-id").val(currentOrderId); // Update the hidden input field
-  });
+    $("#order-transaction-select").change(function () {
+      currentOrderId = $(this).val();
+      $("#order-id").val(currentOrderId); // Update the hidden input field
+    });
 
-  $(".category-card").click(function () {
-    let categoryId = $(this).data("category");
+    $(".category-card").click(function () {
+      let categoryId = $(this).data("category");
 
-    $.ajax({
-      url: "{% url 'load_menu_items' %}",
-      data: { category: categoryId },
-      success: function (data) {
-        data.forEach(function (menuItem) {
-          let existingQuantity = selectedItems[menuItem.id] || "";
+      $.ajax({
+        url: "{% url 'load_menu_items' %}",
+        data: { category: categoryId },
+        success: function (data) {
+          data.forEach(function (menuItem) {
+            let existingQuantity = selectedItems[menuItem.id] || "";
 
-          if (!$(`#menu-item-${menuItem.id}`).length) {
-            let menuHtml = `
+            if (!$(`#menu-item-${menuItem.id}`).length) {
+              let menuHtml = `
               <div class="col-md-4" id="menu-item-${menuItem.id}">
                 <div class="card menu-item-card">
                   <div class="card-body">
@@ -259,77 +272,77 @@ $(document).ready(function () {
                 </div>
               </div>
             `;
-            // $("#menu-items-container").append(menuHtml);
-            // Prepend the new items so that they appear on top
-            $("#menu-items-container").prepend(menuHtml);
-          }
-        });
-      },
-      error: function () {
-        alert("Failed to load menu items. Please try again.");
-      },
-    });
-  });
-
-  // Save selected quantities when the input changes
-  $(document).on("input", ".quantity-input", function () {
-    let menuItemId = $(this).data("menu-id");
-    selectedItems[menuItemId] = $(this).val();
-  });
-
-  $("#submit-orders").click(function () {
-    let orders = [];
-    $(".quantity-input").each(function () {
-      let quantity = $(this).val();
-      if (quantity > 0) {
-        orders.push({
-          menu_item_id: $(this).data("menu-id"),
-          quantity: quantity,
-        });
-      }
-    });
-
-    if (orders.length === 0) {
-      alert("Please select at least one item to order.");
-      return;
-    }
-
-    let orderDetails = {
-      random_id: currentOrderId, // Keep order ID for continuity
-      customer_name: $("#customer-name").val(),
-      order_type: $("#order-type").val(),
-      status: $("#status").val(),
-      special_notes: $("#special-notes").val(),
-      orders: orders,
-    };
-
-    fetch("{% url 'submit_orders' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
-      },
-      body: JSON.stringify(orderDetails),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.order_id) {
-          currentOrderId = data.order_id; // Ensure continuity of transaction
-        }
-        if (data.redirect_url) {
-          window.location.href = data.redirect_url;
-        } else {
-          alert(data.message || "Order saved successfully.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert("An error occurred while submitting the order.");
+              // $("#menu-items-container").append(menuHtml);
+              // Prepend the new items so that they appear on top
+              $("#menu-items-container").prepend(menuHtml);
+            }
+          });
+        },
+        error: function () {
+          alert("Failed to load menu items. Please try again.");
+        },
       });
+    });
+
+    // Save selected quantities when the input changes
+    $(document).on("input", ".quantity-input", function () {
+      let menuItemId = $(this).data("menu-id");
+      selectedItems[menuItemId] = $(this).val();
+    });
+
+    $("#submit-orders").click(function () {
+      let orders = [];
+      $(".quantity-input").each(function () {
+        let quantity = $(this).val();
+        if (quantity > 0) {
+          orders.push({
+            menu_item_id: $(this).data("menu-id"),
+            quantity: quantity,
+          });
+        }
+      });
+
+      if (orders.length === 0) {
+        alert("Please select at least one item to order.");
+        return;
+      }
+
+      let orderDetails = {
+        random_id: currentOrderId, // Keep order ID for continuity
+        customer_name: $("#customer-name").val(),
+        order_type: $("#order-type").val(),
+        status: $("#status").val(),
+        special_notes: $("#special-notes").val(),
+        orders: orders,
+      };
+
+      fetch("{% url 'submit_orders' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify(orderDetails),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.order_id) {
+            currentOrderId = data.order_id; // Ensure continuity of transaction
+          }
+          if (data.redirect_url) {
+            window.location.href = data.redirect_url;
+          } else {
+            alert(data.message || "Order saved successfully.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("An error occurred while submitting the order.");
+        });
+    });
   });
-});
 
-  </script>
+</script>
 
-  {% endblock content %}
+{% endblock content %}
 </div>

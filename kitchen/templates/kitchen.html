@@ -1,151 +1,456 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <div class="card-body">
-        <div class="row">
-            <h4 class="fw-semibold mb-4">Manage and Track Orders</h4>
-            <div class="container">
-                {% if orders %}
-                    {% for order in orders reversed %}
-                    <div class="card my-4">
-                        <div class="row my-2 ms-3">
-                            <div class="col-3">
-                                <p class="fw-bolder">Order:</p>
-                                <p class="fw-bolder">Menu Item:</p>
-                                <p class="fw-bolder">Status:</p>
-                                <p class="fw-bolder">Quatity:</p>
-                                <p class="fw-bolder">Special Notes:</p>
-                            </div>
-                            <div class="col">
-                                <p>{{ order.order|truncatechars:30 }}</p>
-                                <p>{{ order.menu_item }}</p>
-                                <!-- Status with color coding -->
-                                <h5 class="fw-bolder status-text {% if order.status == 'Pending' %}status-pending
-                                            {% elif order.status == 'Preparing' %}status-preparing
-                                            {% elif order.status == 'Served' %}status-served
-                                            {% elif order.status == 'Cooked' %}status-completed
-                                            {% elif order.status == 'Cancelled' %}status-cancelled
-                                            {% endif %}">
-                                    {{ order.status }}
-                                </h5>
-                                <p> {{ order.quantity }}</p>
-
-                                <p>{{ order.special_notes|default:"N/A" }}</p>
-                            </div>
-                            <div class="col mx-3">
-                                <h5 class="mt-5">Update Order Status</h5>
-                                <form action="/kitchen/update_order_status/{{order.id}}/" method="post">
-                                    {% csrf_token %}
-                                    <select name="status" class="form-select mb-2 order-status-select" data-order-id="{{ order.id }}">
-                                        <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
-                                        <option value="Preparing" {% if order.status == "Preparing" %}selected{% endif %}>Preparing</option>
-                                        <option value="Cooked" {% if order.status == "Completed" %}selected{% endif %}>Completed</option>
-                                        <option value="Served" {% if order.status == "Served" %}selected{% endif %}>Served</option>
-                                        <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-md btn-primary">Update Status</button>
-                                    
-                                    
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p>No orders available at the moment.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        {% if orders.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page=1">First</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" href="?page={{ orders.previous_page_number }}">Previous</a>
-        </li>
-        {% endif %}
-
-        {% for page_num in orders.paginator.page_range %}
-            {% if page_num >= orders.number|add:-2 and page_num <= orders.number|add:2 %}
-            <li class="page-item {% if page_num == orders_list.number %}active{% endif %}">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-            </li>
-            {% elif page_num == 1 or page_num == orders.paginator.num_pages %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-            </li>
-            {% elif page_num == orders.number|add:-3 or page_num == orders.number|add:3 %}
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-        {% endfor %}
-
-        {% if orders.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ orders.next_page_number }}">Next</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" href="?page={{ orders.paginator.num_pages }}">Last</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-
-<!-- Custom CSS for Status Colors -->
 <style>
-    .status-pending { color: orange; }
-    .status-preparing { color: blue; }
-    .status-served { color: green; }
-    .status-completed { color: darkgreen; }
-    .status-cancelled { color: red; }
+    /* Modern Card & Container Styling */
+    .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .order-card-body {
+        padding: 1.5rem;
+    }
+    
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .order-grid {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    /* Status Badge Styling */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        gap: 0.5rem;
+    }
+    
+    .status-pending {
+        background-color: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
+    }
+    
+    .status-preparing {
+        background-color: rgba(0, 137, 255, 0.15);
+        color: #0089ff;
+    }
+    
+    .status-served {
+        background-color: rgba(40, 199, 111, 0.15);
+        color: #28c76f;
+    }
+    
+    .status-completed {
+        background-color: rgba(0, 128, 0, 0.15);
+        color: #008000;
+    }
+    
+    .status-cancelled {
+        background-color: rgba(234, 84, 85, 0.15);
+        color: #ea5455;
+    }
+    
+    /* Form Elements Styling */
+    .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 0.65rem 1rem;
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .btn {
+        border-radius: 8px;
+        padding: 0.65rem 1.25rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background-color: #4361ee;
+        border-color: #4361ee;
+    }
+    
+    .btn-primary:hover {
+        background-color: #3a56d5;
+        border-color: #3a56d5;
+        transform: translateY(-2px);
+    }
+    
+    /* Order Info Styling */
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 0.5rem 1.5rem;
+        align-items: baseline;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .info-value {
+        color: #212529;
+    }
+    
+    /* Status Select Styling */
+    .select-status-pending {
+        border-color: #ff9f43;
+    }
+    
+    .select-status-preparing {
+        border-color: #0089ff;
+    }
+    
+    .select-status-served {
+        border-color: #28c76f;
+    }
+    
+    .select-status-completed {
+        border-color: #008000;
+    }
+    
+    .select-status-cancelled {
+        border-color: #ea5455;
+    }
+    
+    /* Pagination Styling */
+    .pagination {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .page-link {
+        border-radius: 6px;
+        margin: 0 0.15rem;
+        color: #4361ee;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #4361ee;
+        border-color: #4361ee;
+    }
+    
+    /* Empty State Styling */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    /* Media Queries for Responsiveness */
+    @media (min-width: 768px) {
+        .order-grid {
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .card-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .order-status-form {
+            margin-top: 1rem;
+            width: 100%;
+        }
+        
+        .order-status-form .row {
+            flex-direction: column;
+        }
+        
+        .order-status-form .col-auto:last-child {
+            margin-top: 0.5rem;
+        }
+    }
 </style>
 
-<!-- JavaScript to Apply Status Color Classes -->
+<div class="main-container">
+    <div class="page-header">
+        <div>
+            <h3 class="fw-bold mb-1">Kitchen Order Management</h3>
+            <p class="text-muted mb-0">Track and update the status of all kitchen orders</p>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <select class="form-select status-filter" id="statusFilter">
+                <option value="all">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Preparing">Preparing</option>
+                <option value="Cooked">Completed</option>
+                <option value="Served">Served</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            
+            <button type="button" class="btn btn-outline-secondary" id="refreshOrders">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="order-grid">
+        {% for order in orders reversed %}
+        <div class="card order-card" data-status="{{ order.status }}">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center card-header-content">
+                    <div>
+                        <span class="status-badge 
+                            {% if order.status == 'Pending' %}status-pending
+                            {% elif order.status == 'Preparing' %}status-preparing
+                            {% elif order.status == 'Served' %}status-served
+                            {% elif order.status == 'Cooked' %}status-completed
+                            {% elif order.status == 'Cancelled' %}status-cancelled
+                            {% endif %}">
+                            <i class="fas 
+                                {% if order.status == 'Pending' %}fa-clock
+                                {% elif order.status == 'Preparing' %}fa-fire
+                                {% elif order.status == 'Served' %}fa-utensils
+                                {% elif order.status == 'Cooked' %}fa-check-circle
+                                {% elif order.status == 'Cancelled' %}fa-times-circle
+                                {% endif %}"></i>
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    <div class="small text-muted">
+                        <i class="fas fa-calendar-alt"></i> Order #{{ order.id }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-card-body">
+                <div class="row">
+                    <div class="col-md-7 mb-3 mb-md-0">
+                        <h5 class="mb-3 fw-bold">Order Details</h5>
+                        <div class="order-info-grid">
+                            <div class="info-label">Order:</div>
+                            <div class="info-value">{{ order.order|truncatechars:30 }}</div>
+                            
+                            <div class="info-label">Menu Item:</div>
+                            <div class="info-value">{{ order.menu_item }}</div>
+                            
+                            <div class="info-label">Quantity:</div>
+                            <div class="info-value">{{ order.quantity }}</div>
+                            
+                            <div class="info-label">Special Notes:</div>
+                            <div class="info-value">{{ order.special_notes|default:"N/A" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <h5 class="mb-3 fw-bold">Update Status</h5>
+                        <form action="/kitchen/update_order_status/{{order.id}}/" method="post" class="order-status-form">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <select name="status" class="form-select order-status-select
+                                    {% if order.status == 'Pending' %}select-status-pending
+                                    {% elif order.status == 'Preparing' %}select-status-preparing
+                                    {% elif order.status == 'Served' %}select-status-served
+                                    {% elif order.status == 'Cooked' %}select-status-completed
+                                    {% elif order.status == 'Cancelled' %}select-status-cancelled
+                                    {% endif %}" 
+                                    data-order-id="{{ order.id }}">
+                                    <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
+                                    <option value="Preparing" {% if order.status == "Preparing" %}selected{% endif %}>Preparing</option>
+                                    <option value="Cooked" {% if order.status == "Cooked" %}selected{% endif %}>Completed</option>
+                                    <option value="Served" {% if order.status == "Served" %}selected{% endif %}>Served</option>
+                                    <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-save"></i> Update Status
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-utensils empty-state-icon"></i>
+        <h4 class="mb-2">No Active Orders</h4>
+        <p class="text-muted mb-3">There are currently no orders to prepare or track.</p>
+        <p class="mb-0">New orders will appear here automatically when they are placed.</p>
+    </div>
+    {% endif %}
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if orders.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="First">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in orders.paginator.page_range %}
+                {% if page_num >= orders.number|add:-2 and page_num <= orders.number|add:2 %}
+                <li class="page-item {% if page_num == orders.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% elif page_num == 1 or page_num == orders.paginator.num_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% elif page_num == orders.number|add:-3 or page_num == orders.number|add:3 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if orders.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ orders.paginator.num_pages }}" aria-label="Last">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- JavaScript for Status Selection and Filtering -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Function to update the color class based on selected status
-        function updateStatusColor(selectElement) {
+        // Function to update the status styling for select elements
+        function updateStatusStyles(selectElement) {
             const status = selectElement.value;
-            selectElement.classList.remove('status-pending', 'status-preparing', 'status-served', 'status-completed', 'status-cancelled');
             
+            // Remove all existing status classes
+            selectElement.classList.remove(
+                'select-status-pending', 
+                'select-status-preparing', 
+                'select-status-served', 
+                'select-status-completed', 
+                'select-status-cancelled'
+            );
+            
+            // Add the appropriate class based on the selected status
             switch(status) {
                 case 'Pending':
-                    selectElement.classList.add('status-pending');
+                    selectElement.classList.add('select-status-pending');
                     break;
                 case 'Preparing':
-                    selectElement.classList.add('status-preparing');
+                    selectElement.classList.add('select-status-preparing');
                     break;
                 case 'Served':
-                    selectElement.classList.add('status-served');
+                    selectElement.classList.add('select-status-served');
                     break;
-                case 'Completed':
-                    selectElement.classList.add('status-completed');
+                case 'Cooked':
+                    selectElement.classList.add('select-status-completed');
                     break;
                 case 'Cancelled':
-                    selectElement.classList.add('status-cancelled');
+                    selectElement.classList.add('select-status-cancelled');
                     break;
             }
         }
 
-        // Apply the color on page load for each select element
-        document.querySelectorAll('.order-status-select').forEach(selectElement => {
-            updateStatusColor(selectElement);
-
-            // Update the color whenever the selection changes
-            selectElement.addEventListener('change', function() {
-                updateStatusColor(selectElement);
+        // Apply status styling to all select elements on page load
+        document.querySelectorAll('.order-status-select').forEach(select => {
+            updateStatusStyles(select);
+            
+            // Update styling when selection changes
+            select.addEventListener('change', function() {
+                updateStatusStyles(this);
             });
         });
+        
+        // Status filter functionality
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                const selectedStatus = this.value;
+                const orderCards = document.querySelectorAll('.order-card');
+                
+                orderCards.forEach(card => {
+                    if (selectedStatus === 'all' || card.dataset.status === selectedStatus) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Refresh button functionality
+        const refreshButton = document.getElementById('refreshOrders');
+        if (refreshButton) {
+            refreshButton.addEventListener('click', function() {
+                location.reload();
+            });
+        }
     });
 </script>
-
-<!-- Bootstrap JS, Popper.js, and jQuery -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock content %}

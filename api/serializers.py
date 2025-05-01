@@ -11,12 +11,16 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderTransactionSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, read_only=True)
+    created_by_username = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderTransaction
         fields = '__all__'
         # exclude = ['created', 'updated', 'random_id']
         read_only_fields = ['id', 'created', 'updated', 'random_id']
+
+    def get_created_by_username(self, obj):
+        return obj.created_by.username if obj.created_by else None
 
 class TableSerializer(serializers.ModelSerializer):
     class Meta:
