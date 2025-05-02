@@ -1,9 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
-import uuid
 import random
-import string
 from decimal import Decimal, InvalidOperation
 
 def generate_random_id():
@@ -11,9 +8,13 @@ def generate_random_id():
 
 class Category(models.Model):
     GROUPING_CHOICES = (
+        ("Appetizers", "Appetizers"),
         ("Starter", "Starter"),
         ("Main Dishes", "Main Dishes"),
-        ("Desserts & Beverages", "Desserts & Beverages"),
+        ("Desserts", "Desserts"),
+        ("Beverages", "Beverages"),
+        ("Snacks", "Snacks"),
+        ("Breakfast", "Breakfast"),
     )
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100)
@@ -88,9 +89,6 @@ class OrderTransaction(models.Model):
 
 
 
-from decimal import Decimal, InvalidOperation
-from django.db import models
-
 class OrderItem(models.Model):
     ORDER_TYPE_CHOICES = [
         ('Dine-In', 'Dine-In'),
@@ -134,7 +132,7 @@ class OrderItem(models.Model):
         choices=ORDER_TYPE_CHOICES,
         default='Dine-In'
     )
-    updated = models.DateField(auto_now=True, blank=True, null=True)
+    updated = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.menu_item and self.quantity:
