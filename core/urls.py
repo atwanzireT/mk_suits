@@ -8,4 +8,7 @@ urlpatterns = [
     path('logoutpage', views.logout_page, name='logoutpage'),
     path('api_register/', RegisterView.as_view(), name='register'),
     path('api_login/', LoginView.as_view(), name='login'),
+    path('users/', UserListView.as_view(), name='user-list'),
+    path('users/create/', UserCreateView.as_view(), name='user-create'),
+    path('users/<int:pk>/edit/', UserUpdateView.as_view(), name='user-update'),
 ]
