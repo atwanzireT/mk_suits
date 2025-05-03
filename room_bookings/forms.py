@@ -131,29 +131,26 @@ class RoomReservationForm(forms.ModelForm):
 class RoomTypeForm(forms.ModelForm):
     class Meta:
         model = RoomType
-        fields = ['name', 'description', 'base_price', 'room_image']
+        fields = ['name', 'description', 'room_image']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'room_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['name'].required = True  # Explicitly set name as required
+
 
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = '__all__'
+        exclude = ['hotel']
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'room_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'room_type': forms.Select(attrs={'class': 'form-control'}),
+            'capacity': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'price_per_night': forms.NumberInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'room_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'floor': forms.NumberInput(attrs={'class': 'form-control'}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Make is_available optional with default checkbox checked
-        self.fields['is_available'].required = False
-        # Set required fields explicitly (optional but explicit)
-        self.fields['room_number'].required = True
-        self.fields['room_type'].required = True
-        self.fields['capacity'].required = True
-        self.fields['floor'].required = True

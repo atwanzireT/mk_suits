@@ -66,9 +66,6 @@ def dashboard(request):
     return render(request, "dashboard.html", context)
 
 
-
-
-
 # MENU ITEMS VIEW
 @login_required(login_url='/user/login/')
 def menu(request):
@@ -80,29 +77,6 @@ def load_menu_items(request):
     category_id = request.GET.get('category')
     menu_items = MenuItem.objects.filter(category_id=category_id).values('id', 'name')
     return JsonResponse(list(menu_items), safe=False)
-
-
-
-# ADD MENU ITEM VIEW
-@login_required(login_url='/user/login/')
-def add_menu_item(request):
-    if request.method == 'POST':
-        form = MenuItemForm(request.POST)
-        if form.is_valid():
-            menu_item = form.save(commit=False)
-            menu_item.created_by = request.user
-            menu_item.save()
-            return redirect('menu')
-    else:
-        form = MenuItemForm()
-
-    return render(request, 'add_menu_item.html', {'form': form})
-
-# DAILY SPECIALS LIST VIEW
-class DailySpecialListView(LoginRequiredMixin, ListView):
-    model = DailySpecial
-    template_name = 'dailyspecials/dailyspecial_list.html'
-    context_object_name = 'dailyspecials'
 
 
 # ORDERS VIEW
@@ -295,16 +269,18 @@ def clearedTransactions(request):
 def getOrderTransaction(request, id):
     order = get_object_or_404(OrderTransaction, id=id)
     settings = Setting.objects.first()
-    order_items = OrderItem.objects.filter(order=order)
+    
+    # Filter out cancelled order items
+    order_items = OrderItem.objects.filter(order=order).exclude(status='Cancelled')
 
-    # Calculate the correct total by summing item.total_price instead of item.menu_item.price
+    # Calculate the total price using only non-cancelled items
     total_price = sum(item.total_price for item in order_items)
 
     context = {
         'order': order,
         'order_items': order_items,
         'total_price': total_price,
-        'setting': settings  # Adding settings to context
+        'setting': settings
     }
     return render(request, "getordertransactions.html", context)
 

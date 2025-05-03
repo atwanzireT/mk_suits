@@ -54,7 +54,7 @@ class LoginView(APIView):
 
 class StaffRequiredMixin(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_staff or self.request.user.is_superuser
+        return self.request.user.is_superuser
 
 class UserListView(StaffRequiredMixin, ListView):
     model = User

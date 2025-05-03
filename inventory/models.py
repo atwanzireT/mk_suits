@@ -58,12 +58,15 @@ class Table(models.Model):
     def __str__(self):
         return f"Table {self.table_number} in {self.dining_area.name}"
 
+
+
 class OrderTransaction(models.Model):
     pay_mode = (
         ("NO PAYMENT", "NO PAYMENT"),
         ("CASH", "CASH"),
         ("MOMO PAY", "MOMO PAY"),
         ("AIRTEL PAY", "AIRTEL PAY"),
+        ("INVOICE", "INVOICE"),
     )
     random_id = models.CharField(max_length=6, unique=True, editable=False, default=generate_random_id)
     customer_name = models.CharField(max_length=255, blank=True, null=True, default="Customer")
@@ -72,7 +75,7 @@ class OrderTransaction(models.Model):
     special_notes = models.TextField(default="Null")
     created = models.DateField(auto_now_add=True, blank=True, null=True)
     payment_mode = models.CharField(default="NO PAYMENT", max_length=50, choices=pay_mode)
-    transaction_id = models.CharField(blank=True, null=True, max_length=100)
+    transaction_id = models.CharField(blank=True, null=True, max_length=100, help_text="Transaction ID / Invoice Number")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     updated = models.DateField(auto_now=True, blank=True, null=True)
 

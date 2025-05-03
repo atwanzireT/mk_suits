@@ -2,6 +2,7 @@ from django.urls import path
 from .views import  *
 from room_bookings.generate_pdfs.sauna_order import print_sauna_order
 from room_bookings.generate_pdfs.reservation_order import print_reservation
+from .reports import generate_reservations_report, generate_reservation_pdf
 
 urlpatterns=[
     # Reservations
@@ -22,5 +23,9 @@ urlpatterns=[
     path('roomtypes/', rooms, name='rooms'),
     path('rooms/<str:id>/', rooms_filter, name='rooms-filter'),
     path('manage-rooms/', RoomManagementView.as_view(), name='room_management'),
+    
+    # Reports
+    path('report/csv/', generate_reservations_report, name='reservations_report'),
+    path('<int:reservation_id>/pdf/', generate_reservation_pdf, name='reservation_pdf'),
 
 ]

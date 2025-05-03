@@ -37,8 +37,9 @@ def mark_attendance(request):
         return redirect('attendance_list')
     return render(request, 'mark_attendance.html', {'form': form, 'today': today})
 
+from django.utils.timezone import now
+from datetime import datetime
 
-# Checkout Attendance
 def checkout_attendance(request, pk):
     attendance_record = get_object_or_404(StaffAttendance, pk=pk)
 
@@ -46,16 +47,35 @@ def checkout_attendance(request, pk):
         return redirect('attendance_list')
 
     if request.method == 'POST':
-        attendance_record.time_out = timezone.now().time()
-        attendance_record.date_out = timezone.now().date()
+        # Get user-submitted time and date
+        time_out_str = request.POST.get('time_out')
+        date_out_str = request.POST.get('date_out')
+
+        try:
+            # Parse time_out (format: 'HH:MM')
+            time_out = datetime.strptime(time_out_str, '%H:%M').time()
+            attendance_record.time_out = time_out
+        except (ValueError, TypeError):
+            # Fallback to current time if invalid
+            attendance_record.time_out = now().time()
+
+        try:
+            # Parse date_out (format: 'YYYY-MM-DD')
+            date_out = datetime.strptime(date_out_str, '%Y-%m-%d').date()
+            attendance_record.date_out = date_out
+        except (ValueError, TypeError):
+            # Fallback to current date if invalid
+            attendance_record.date_out = now().date()
+
         attendance_record.save()
         return redirect('attendance_list')
-    
-    current_time = timezone.now().time().strftime('%H:%M')
-    current_date = timezone.now().date().strftime('%Y-%m-%d')
+
+    # Default values for the form (pre-filled with current time/date)
+    default_time_out = now().strftime('%H:%M')  # Format: '14:30'
+    default_date_out = attendance_record.date.strftime('%Y-%m-%d')  # Use check-in date as default
 
     return render(request, 'checkout_attendance.html', {
         'attendance': attendance_record,
-        'current_time': current_time,
-        'current_date': current_date,
+        'default_time_out': default_time_out,
+        'default_date_out': default_date_out,
     })

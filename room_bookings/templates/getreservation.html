@@ -74,57 +74,43 @@
                             <p><strong>Thank you for staying with us!</strong></p>
                             <p><em>Created by: <span id="created_by">{{ reservation.created_by.username }}</span></em></p>
                         </div>
+
+                        <!-- PDF Generation Button -->
+                        <div class="text-center mt-4">
+                            <a href="/reservation/{{reservation.id}}/pdf/" class="btn btn-primary">
+                                Generate PDF Receipt
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-auto">
-                    <a href="/manager/print_reservation/{{reservation.id}}/" class="btn btn-primary no-print">
-                        
-
-                        Print Receipt</a>
-                        </div>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock content %}
 
 {% block extra_css %}
 <style>
-    /* Hide unnecessary elements during print */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-
-        #receipt, #receipt * {
-            visibility: visible;
-        }
-
-        #receipt {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .no-print {
-            display: none;
-        }
+    /* Removed print-specific styles */
+    #receipt {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: white;
     }
 </style>
 {% endblock extra_css %}
 
 {% block extra_js %}
 <script>
-    // JavaScript to fetch reservation details via AJAX
-    function fetchReservationDetails() {
-        const reservationId = "{{ reservation.id }}";  // Get reservation ID dynamically
+    // Simplified version without print functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const reservationId = "{{ reservation.id }}";
         fetch(`/fetch_reservation_details/${reservationId}/`)
             .then(response => response.json())
             .then(data => {
-                // Update DOM elements with the fetched data
                 document.getElementById('receipt_number').textContent = data.random_id;
-                document.getElementById('customer').textContent = data.customer;
+                document.getElementById('customer_name').textContent = data.customer;
                 document.getElementById('reservation_date').textContent = data.reservation_date;
                 document.getElementById('room_number').textContent = data.room_number;
                 document.getElementById('total_nights').textContent = data.total_nights;
@@ -135,10 +121,7 @@
                 document.getElementById('special_requests').textContent = data.special_requests;
                 document.getElementById('created_by').textContent = data.created_by;
             })
-            .catch(error => console.error('Error fetching reservation details:', error));
-    }
-
-    // Automatically fetch reservation details when the page is loaded
-    window.onload = fetchReservationDetails;
+            .catch(error => console.error('Error:', error));
+    });
 </script>
 {% endblock extra_js %}

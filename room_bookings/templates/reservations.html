@@ -339,12 +339,7 @@
                             <span class="fw-medium">Room {{ reservation.room.room_number }}</span>
                         </td>
                         <td>
-                            <div class="customer-info">
-                                <div class="customer-avatar">
-                                    {{ reservation.customer.first_name|slice:":1" }}{{reservation.customer.last_name|slice:":1" }}
-                                </div>
-                                <div>{{ reservation.customer.first_name }} {{ reservation.customer.last_name }}</div>
-                            </div>
+                            {{ reservation.customer }}
                         </td>
                         <td>{{ reservation.check_in_date }}</td>
                         <td>{{ reservation.total_nights }}</td>

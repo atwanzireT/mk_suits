@@ -30,6 +30,7 @@ urlpatterns = [
     path('user/', include('django.contrib.auth.urls')),
     path('user/', include('core.urls')),
     path('kitchen/', include('kitchen.urls')),
+    path('others/', include('otherPackages.urls')),
     path('room_bookings/',include('room_bookings.urls')),
     path('staffing/', include('staff.urls')),
     path('data/', include('inventory.data_urls')),
