@@ -51,20 +51,20 @@ class MenuItemCreateView(StaffRequiredMixin, CreateView):
     model = MenuItem
     form_class = MenuItemForm
     template_name = 'data/menuitem_form.html'
-    success_url = reverse_lazy('menuitem-list')
+    success_url = "/data/menu-items/"
 
 
 class MenuItemUpdateView(StaffRequiredMixin, UpdateView):
     model = MenuItem
     form_class = MenuItemForm
     template_name = 'data/menuitem_form.html'
-    success_url = reverse_lazy('menuitem-list')
+    success_url = "/data/menu-items/"
 
 
 class MenuItemDeleteView(StaffRequiredMixin, DeleteView):
     model = MenuItem
     template_name = 'data/menuitem_confirm_delete.html'
-    success_url = reverse_lazy('menuitem-list')
+    success_url = "/data/menu-items/"
 
 
 # ----- DINING AREA VIEWS -----
@@ -81,20 +81,20 @@ class DiningAreaCreateView(StaffRequiredMixin, CreateView):
     model = DiningArea
     form_class = DiningAreaForm
     template_name = 'data/diningarea_form.html'
-    success_url = reverse_lazy('diningarea-list')
+    success_url = '/data/dining-areas/'
 
 
 class DiningAreaUpdateView(StaffRequiredMixin, UpdateView):
     model = DiningArea
     form_class = DiningAreaForm
     template_name = 'data/diningarea_form.html'
-    success_url = reverse_lazy('diningarea-list')
+    success_url = '/data/dining-areas/'
 
 
 class DiningAreaDeleteView(StaffRequiredMixin, DeleteView):
     model = DiningArea
     template_name = 'data/diningarea_confirm_delete.html'
-    success_url = reverse_lazy('diningarea-list')
+    success_url = '/data/dining-areas/'
 
 
 # ----- TABLE VIEWS -----
@@ -107,17 +107,16 @@ class TableCreateView(StaffRequiredMixin, CreateView):
     model = Table
     form_class = TableForm
     template_name = 'data/table_form.html'
-    success_url = reverse_lazy('table-list')
+    success_url = '/data/dining-areas/'
 
 
 class TableUpdateView(StaffRequiredMixin, UpdateView):
     model = Table
     form_class = TableForm
     template_name = 'data/table_form.html'
-    success_url = reverse_lazy('table-list')
-
+    success_url = '/data/dining-areas/'
 
 class TableDeleteView(StaffRequiredMixin, DeleteView):
     model = Table
     template_name = 'data/table_confirm_delete.html'
-    success_url = reverse_lazy('table-list')
+    success_url = '/data/dining-areas/'

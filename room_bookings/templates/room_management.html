@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Room Management</h2>
+    
+    <div class="row">
+        <!-- Room Type Form -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add Room Type</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ room_type_form.as_p }}
+                        <button type="submit" name="add_room_type" class="btn btn-primary">Add Room Type</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Room Form -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Add Room</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ room_form.as_p }}
+                        <button type="submit" name="add_room" class="btn btn-primary">Add Room</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Display Existing Data -->
+    <div class="row mt-4">
+        <!-- Room Types List -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Existing Room Types</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for room_type in room_types %}
+                        <li class="list-group-item">
+                            {{ room_type.name }} - ${{ room_type.base_price }}
+                            {% if room_type.room_image %}
+                                <img src="{{ room_type.room_image.url }}" alt="{{ room_type.name }}" class="img-thumbnail" width="100">
+                            {% endif %}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No room types added yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rooms List -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Existing Rooms</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for room in rooms %}
+                        <li class="list-group-item">
+                            {{ room.room_number }} ({{ room.room_type.name }}) - Floor {{ room.floor }}
+                            <span class="badge {% if room.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if room.is_available %}Available{% else %}Occupied{% endif %}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No rooms added yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

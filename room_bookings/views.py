@@ -1,35 +1,11 @@
-from django.shortcuts import render
-import io
-import os
-import requests
-import csv
-from datetime import datetime, time
-from datetime import timedelta
-from django.db.models import Sum
-from io import BytesIO
-from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
-from django.http import HttpResponse, JsonResponse, FileResponse
-from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.core.paginator import Paginator
 from django.views import View
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from reportlab.lib.pagesizes import mm
-from reportlab.lib.units import mm
-from reportlab.pdfgen import canvas
-from django.core.files.temp import NamedTemporaryFile
 from core.models import Setting
 from .forms import *
 from .models import *
-from django.core.paginator import Paginator
-from django.db.models import Count
-from django.db.models.functions import TruncMonth
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.utils.timezone import now
-from django.utils import timezone
 
 # Create your views here.
 def fetch_reservation_details(request, reservation_id):
@@ -117,11 +93,6 @@ def add_customer(request):
 
     return render(request, 'add_customer.html', {'form': form})
 
-
-
-
-    
-    
     
 #Sauna
 @login_required(login_url='/user/login/')
@@ -153,7 +124,7 @@ def sauna_customers(request):
     sauna_list = paginator.get_page(page_number)
 
     return render(request, "sauna_customers.html", {"sauna_list": sauna_list})
-#@@@
+
 
 
 # View for a single sauna customer's details
@@ -169,3 +140,51 @@ def get_sauna_customer(request, id):
 
     # Render the customer's details in the template
     return render(request, 'eachsauna_customer.html', {'customer': customer})
+
+
+class RoomManagementView(View):
+    template_name = 'room_management.html'
+
+    def get(self, request):
+        room_type_form = RoomTypeForm()
+        room_form = RoomForm()
+        room_types = RoomType.objects.all()
+        rooms = Room.objects.select_related('room_type').all()
+        
+        context = {
+            'room_type_form': room_type_form,
+            'room_form': room_form,
+            'room_types': room_types,
+            'rooms': rooms,
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        if 'add_room_type' in request.POST:
+            room_type_form = RoomTypeForm(request.POST, request.FILES)
+            if room_type_form.is_valid():
+                room_type_form.save()
+                return redirect('room_management')
+            # If invalid, fall through to render with errors
+        
+        elif 'add_room' in request.POST:
+            room_form = RoomForm(request.POST, request.FILES)
+            if room_form.is_valid():
+                room_form.save()
+                return redirect('room_management')
+            # If invalid, fall through to render with errors
+        
+        # If neither form was submitted or forms were invalid
+        room_type_form = room_type_form if 'add_room_type' in request.POST else RoomTypeForm()
+        room_form = room_form if 'add_room' in request.POST else RoomForm()
+        
+        room_types = RoomType.objects.all()
+        rooms = Room.objects.select_related('room_type').all()
+        
+        context = {
+            'room_type_form': room_type_form,
+            'room_form': room_form,
+            'room_types': room_types,
+            'rooms': rooms,
+        }
+        return render(request, self.template_name, context)

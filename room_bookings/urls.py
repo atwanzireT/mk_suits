@@ -4,7 +4,7 @@ from room_bookings.generate_pdfs.sauna_order import print_sauna_order
 from room_bookings.generate_pdfs.reservation_order import print_reservation
 
 urlpatterns=[
-        # Reservations
+    # Reservations
     path('reservations/', reservation, name='reservations'),
     path('add-reservation/', add_reservation, name='add_reservation'),
     path('reservations/<str:id>/', getReservation, name='get_reservation'),
@@ -21,5 +21,6 @@ urlpatterns=[
     # Room Types and Rooms
     path('roomtypes/', rooms, name='rooms'),
     path('rooms/<str:id>/', rooms_filter, name='rooms-filter'),
+    path('manage-rooms/', RoomManagementView.as_view(), name='room_management'),
 
 ]

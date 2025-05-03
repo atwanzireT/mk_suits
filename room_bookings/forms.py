@@ -2,6 +2,8 @@ from django import forms
 from .models import Customer, SaunaUser, RoomReservation
 from django.core.validators import RegexValidator
 from django.utils import timezone
+from django import forms
+from .models import RoomType, Room
 
 class CustomerForm(forms.ModelForm):
     class Meta:
@@ -125,3 +127,33 @@ class RoomReservationForm(forms.ModelForm):
                 raise forms.ValidationError("Check-out date must be after check-in date")
                 
         return cleaned_data
+
+class RoomTypeForm(forms.ModelForm):
+    class Meta:
+        model = RoomType
+        fields = ['name', 'description', 'base_price', 'room_image']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].required = True  # Explicitly set name as required
+
+class RoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = '__all__'
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make is_available optional with default checkbox checked
+        self.fields['is_available'].required = False
+        # Set required fields explicitly (optional but explicit)
+        self.fields['room_number'].required = True
+        self.fields['room_type'].required = True
+        self.fields['capacity'].required = True
+        self.fields['floor'].required = True
