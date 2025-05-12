@@ -30,7 +30,7 @@ def attendance_list(request):
 # Mark Attendance
 @login_required
 def mark_attendance(request):
-    form = StaffAttendanceForm(request.POST or None)
+    form = StaffAttendanceForm(request.POST or None )
     today = timezone.now()  # Get today's date
     if form.is_valid():
         form.save()
@@ -79,3 +79,19 @@ def checkout_attendance(request, pk):
         'default_time_out': default_time_out,
         'default_date_out': default_date_out,
     })
+    
+@login_required
+def staff_detail(request, pk):
+    staff = get_object_or_404(Staff, pk=pk)
+    return render(request, 'staff_detail.html', {'staff': staff})
+
+
+@login_required
+def edit_staff(request, pk):
+    staff = get_object_or_404(Staff, pk=pk)
+    form = StaffForm(request.POST or None,
+                     request.FILES or None, instance=staff)
+    if form.is_valid():
+        form.save()
+        return redirect('staff_list')
+    return render(request, 'edit_staff.html', {'form': form, 'staff': staff})

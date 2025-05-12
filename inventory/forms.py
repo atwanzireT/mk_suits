@@ -2,6 +2,7 @@ from django import forms
 from .models import  OrderTransaction, OrderItem
 from .models import OrderItem, MenuItem, Category, DiningArea, Table
 
+
 class OrderForm(forms.ModelForm):
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),

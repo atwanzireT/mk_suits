@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load humanize %}
+{% block content %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+
+<div class="financial-report container my-4">
+  <header class="text-center mb-4">
+    <h1 class="font-weight-bold">Financial Report</h1>
+    <p class="text-muted">Period: {{ start_date }} to {{ end_date }}</p>
+   
+    
+  </header>
+<div>
+  <form method="get" class="form-inline justify-content-center mb-4">
+  <label for="month" class="mr-2">Month:</label>
+  <select name="month" id="month" class="form-control mr-3">
+    {% for m in 1|to:12 %}
+      <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="year" class="mr-2">Year:</label>
+  <select name="year" id="year" class="form-control mr-3">
+    {% for y in 2020|to:2030 %}
+      <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
+</div>
+
+  <div class="row">
+    <!-- Income Statement Section -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary/50 text-white">
+          <h2 class="h5 mb-0">Income Statement</h2>
+        </div>
+        <div class="card-body">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <th>Total Revenue:</th>
+                <td class="text-right">Shs. {{ income.total_revenue|intcomma }}</td>
+              </tr>
+              <tr>
+                <th>Total Expenses:</th>
+                <td class="text-right">Shs. {{ income.total_expenses|intcomma}}</td>
+              </tr>
+              <tr class="table-active font-weight-bold">
+                <th>Net Profit:</th>
+                <td class="text-right">Shs. {{ income.net_profit|intcomma }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance Sheet Section -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header ">
+          <h2 class="h5 mb-0">Balance Sheet</h2>
+        </div>
+        <div class="card-body">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <th>Assets:</th>
+                <td class="text-right">Shs. {{ balance.assets|intcomma }}</td>
+              </tr>
+              <tr>
+                <th>Liabilities:</th>
+                <td class="text-right">Shs. {{ balance.liabilities|intcomma }}</td>
+              </tr>
+              <tr class="table-active font-weight-bold">
+                <th>Equity:</th>
+                <td class="text-right">Shs. {{ balance.equity|intcomma}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Performance Indicators -->
+  <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header  ">
+          <h2 class="h5 mb-0">Key Performance Indicators</h2>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% if revpar is not None %}
+            <div class="col-md-3 col-sm-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h5 class="text-muted">RevPAR</h5>
+                  <h3 class="mb-0">Shs. {{ revpar|floatformat:2 }}</h3>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if adr is not None %}
+            <div class="col-md-3 col-sm-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                  <h5 class="text-muted">ADR</h5>
+                  <h3 class="mb-0">Shs. {{ adr|floatformat:2 }}</h3>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="col-md-3 col-sm-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                <h5 class="text-muted">Profit Margin</h5>
+                <h3 class="mb-0">
+                  {{ profit_margin|floatformat:1 }}%
+                </h3>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+              <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5 class="text-muted">Debt Ratio</h5>
+                    <h3 class="mb-0">
+                      {{ debt_ratio|floatformat:2 }}
+                    </h3>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Financial Metrics -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header  ">
+          <h2 class="h4 mb-0">Financial Analysis</h2>
+        </div>
+        <div class="card-body">
+          <div class="alert {% if income.net_profit > 0 %}alert-success{% else %}alert-warning{% endif %}">
+            <h5>Performance Summary</h5>
+            <p>
+              {% if income.net_profit > 0 %}
+                Your business showed a profit of Shs. {{ income.net_profit|floatformat:2 }} for this period.
+              {% else %}
+                Your business reported a loss of Shs. {{ income.net_profit|absolute|floatformat:2 }} for this period.
+              {% endif %}
+            </p>
+          </div>
+
+          <div class="mt-3">
+            <h5>Recommendations</h5>
+            <ul>
+              {% for item in recommendations %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row my-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm">
+      <div class="card-header  text-white">
+        <h4 class="mb-0">Profit Overview</h4>
+      </div>
+      <div class="card-body">
+        <canvas id="profitChart" width="400" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('profitChart').getContext('2d');
+  const profitChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Revenue', 'Expenses', 'Net Profit'],
+      datasets: [{
+        label: 'Financial Overview ({{ selected_month }}/{{ selected_year }})',
+        data: [
+          {{ income.total_revenue|default:0 }},
+          {{ income.total_expenses|default:0 }},
+          {{ income.net_profit|default:0 }}
+        ],
+        backgroundColor: [
+          'rgba(54, 162, 235, 0.7)',   // Revenue - Blue
+          'rgba(255, 99, 132, 0.7)',   // Expenses - Red
+          'rgba(75, 192, 192, 0.7)'    // Profit - Teal
+        ],
+        borderColor: [
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(75, 192, 192, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock %}
+ 

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load humanize %}
 {% block content %}
 <style>
     /* Modern card & table styling */
@@ -297,7 +297,7 @@
                             <td><span class="fw-medium">{{ order.order.random_id }}</span></td>
                             <td>Table {{ order.order.table }}</td>
                             <td>{{ order.menu_item }}</td>
-                            <td>Ush {{ order.total_price }}</td>
+                            <td>Ush {{ order.total_price|intcomma }}</td>
                             <td>
                                 {% if order.status == 'Completed' %}
                                 <span class="badge badge-completed">

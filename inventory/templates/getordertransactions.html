@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
 <div class="" id="receipt">
@@ -43,8 +44,8 @@
                                 <tr>
                                     <td>{{ item.menu_item.name }}</td>
                                     <td>{{ item.quantity }}</td>
-                                    <td>{{ item.menu_item.price }}</td>
-                                    <td>{{ item.total_price }}</td>
+                                    <td>{{ item.menu_item.price|intcomma }}</td>
+                                    <td>{{ item.total_price|intcomma  }}</td>
                                 </tr>
                                 {% endfor %}
                                 <tr>

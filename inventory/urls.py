@@ -42,6 +42,9 @@ urlpatterns = [
     path('paid-orders/', export_paid_order_to_csv, name='paid-orders'),
     path('general-orders/', export_general_order_to_csv, name='general_orders'),
     path('orders-transactions/csv/', export_orders_report, name='orders_report'),
+    
+
+   
   
 
 ]

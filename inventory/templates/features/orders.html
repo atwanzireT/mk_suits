@@ -1,3 +1,4 @@
+{% load humanize %}
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
   <div class="card-body p-4">
     <div class="d-flex align-items-center justify-content-between mb-4">
@@ -42,7 +43,7 @@
               </span>
             </td>
             <td>{{ order.order.customer_name }}</td>
-            <td class="fw-medium">{{ order.total_price }}</td>
+            <td class="fw-medium">{{ order.total_price|intcomma  }}</td>
             <td>
               {% if order.status == 'Completed' %}
                 <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">

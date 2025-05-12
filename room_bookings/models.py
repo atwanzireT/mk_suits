@@ -49,6 +49,7 @@ class Customer(models.Model):
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
     NIN = models.CharField(max_length=100, default="")
+    customerid_image = models.ImageField(upload_to="rooms", blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
