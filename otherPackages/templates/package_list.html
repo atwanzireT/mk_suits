@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between mb-4">
@@ -27,7 +28,7 @@
                         <td>{{ package.client_name }}</td>
                         <td>{{ package.get_service_type_display }}</td>
                         <td>{{ package.duration }} hours</td>
-                        <td>${{ package.total_amount }}</td>
+                        <td>Ugx Shs. {{ package.total_amount|intcomma }}</td>
                         <td>
                             <span class="badge 
                                 {% if package.status == 'Completed' %}bg-success

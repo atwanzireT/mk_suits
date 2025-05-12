@@ -3,6 +3,7 @@ import os
 import requests
 import csv
 from datetime import timedelta
+from datetime import date
 from django.utils.timezone import localdate
 from django.db.models import Sum
 from io import BytesIO
@@ -305,13 +306,4 @@ def monthly_order_totals(request):
 @login_required(login_url='/user/login/')
 def pos_reports(requests):
     return render(requests, "reports.html", {})
-
-
-#birtday reservations
-def view_reservations(request):
-    reservations = Reservation.objects.all()
-    return render(request, 'reservationslists.html', {'reservations':reservations})
-
-
-
 

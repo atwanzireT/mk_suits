@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 {% load static %}
+{% load humanize %}
 
 <head>
     <meta charset="utf-8">
@@ -269,6 +270,49 @@
                                 <span class="hide-menu">Attendance Register</span>
                             </a>
                         </li>
+                            <li class="nav-small-cap">
+                            <span class="hide-menu text-uppercase fw-bold text-muted">Financial Records</span>
+                        </li>
+                            <li class="sidebar-item">
+                                <a class="sidebar-link" href="/finance/financial-report/" aria-expanded="false">
+                                    <span class="nav-icon">
+                                        <iconify-icon icon="mdi:finance" style="color: #2A6EBB;"></iconify-icon>
+                                    </span>
+                                    <span class="hide-menu">Finance</span>
+                                </a>
+                            </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="/finance/all-assets/" aria-expanded="false">
+                                <span class="nav-icon">
+                                   <iconify-icon icon="lucide:banknote" style="color: #5cb85c;"></iconify-icon>
+                                </span>
+                                <span class="hide-menu">Assets</span>
+                            </a>
+                        </li>
+                                     <li class="sidebar-item">
+                            <a class="sidebar-link" href="/finance/all-liabilities/" aria-expanded="false">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:alert-octagon" style="color: #f0ad4e;"></iconify-icon>
+                                </span>
+                                <span class="hide-menu">Liability</span>
+                            </a>
+                        </li>
+                                    <li class="sidebar-item">
+                            <a class="sidebar-link" href="/finance/all-revenue/" aria-expanded="false">
+                                <span class="nav-icon">
+                                   <iconify-icon icon="lucide:plus-circle" style="color: #0275d8;"></iconify-icon>
+                                </span>
+                                <span class="hide-menu">Revenue</span>
+                            </a>
+                        </li>
+                                    <li class="sidebar-item">
+                            <a class="sidebar-link" href="/finance/all-expense/" aria-expanded="false">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="lucide:receipt" style="color: #d9534f;"></iconify-icon>
+                                </span>
+                                <span class="hide-menu">Expense</span>
+                            </a>
+                        </li>
 
                         <li class="nav-small-cap">
                             <span class="hide-menu text-uppercase fw-bold text-muted">Analytics</span>
@@ -282,6 +326,7 @@
                                 <span class="hide-menu">Reports</span>
                             </a>
                         </li>
+                         
 
                         <li class="nav-small-cap">
                             <span class="hide-menu text-uppercase fw-bold text-muted">Exit App</span>
@@ -352,10 +397,16 @@
                                     <li><a class="dropdown-item" href="/data/categories/">Manage Menu Categories</a></li>
                                     <li><a class="dropdown-item" href="/data/menu-items/">Manage Menu Items</a></li>
                                     <li><a class="dropdown-item" href="/room_bookings/manage-rooms/">Manage Rooms</a></li>
+                                    
+                                    <li><a class="dropdown-item" href="/finance/revenue/add/">Manage Revenue</a></li>
+                                    <li><a class="dropdown-item" href="/finance/expense/add/">Manage Expense</a></li>
+                                    <li><a class="dropdown-item" href="/finance/asset/add/">Manage Assets</a></li>
+                                    <li><a class="dropdown-item" href="/finance/liability/add/">Manage Liability</a></li>
                                     <li><a class="dropdown-item" href="/user/users/">Manage Users</a></li>
+                              
                                 </ul>
                             </li>
-
+f
 
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2"

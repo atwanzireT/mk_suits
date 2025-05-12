@@ -30,6 +30,7 @@
                             <th>Position</th>
                             <th>Hire Date</th>
                             <th>Status</th>
+                            <th>View</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,6 +50,7 @@
                                 <span class="badge bg-danger">Inactive</span>
                                 {% endif %}
                             </td>
+                            <td><a href="/staffing/staff/{{staff.pk}}/">View</a> </td>
                         </tr>
                         {% empty %}
                         <tr>
