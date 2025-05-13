@@ -164,35 +164,67 @@ def liabities(request):
     return render(request, "liability.html", {"all_liability": all_liability})
 
 
-
 @login_required(login_url='/user/login/')
 def revenue(request):
- 
+    # Get selected month and year from query parameters
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
+
+    # Filter by selected month and year if provided
     revenue_list = Revenue.objects.all().order_by('-date')
+    if selected_month and selected_year:
+        revenue_list = revenue_list.filter(
+            date__year=selected_year,
+            date__month=selected_month
+        )
+
+    # Calculate total amount
+    total_revenue = revenue_list.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Pagination
     paginator = Paginator(revenue_list, 10)
-
-    # Get the page number from the request
     page_number = request.GET.get('page')
+    revenue_page = paginator.get_page(page_number)
 
-    # Get the corresponding page
-    sauna_list = paginator.get_page(page_number)
-
-    return render(request, "revenue.html", {"revenue_list": revenue_list})
-
-
-
+    # Pass selected filters and total to the template
+    context = {
+        "revenue_list": revenue_page,
+        "total_revenue": total_revenue,
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+    }
+    return render(request, "revenue.html", context)
 
 
 @login_required(login_url='/user/login/')
-def all_expense(request):
+def expense(request):
+    # Get selected month and year from query parameters
+    selected_month = request.GET.get('month')
+    selected_year = request.GET.get('year')
 
+    # Filter by selected month and year if provided
     expense_list = Expense.objects.all().order_by('-date')
+    if selected_month and selected_year:
+        expense_list = expense_list.filter(
+            date__year=selected_year,
+            date__month=selected_month
+        )
+
+    # Calculate total amount
+    total_expense = expense_list.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Pagination
     paginator = Paginator(expense_list, 10)
-
-    # Get the page number from the request
     page_number = request.GET.get('page')
+    expense_page = paginator.get_page(page_number)
 
-    # Get the corresponding page
-    expense_list = paginator.get_page(page_number)
+    # Pass selected filters and total to the template
+    context = {
+        "expense_list": expense_page,
+        "total_expense": total_expense,
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+    }
+    return render(request, "expense.html", context)
 
-    return render(request, "expense.html", {"expense_list": expense_list})
+

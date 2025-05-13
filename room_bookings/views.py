@@ -69,7 +69,7 @@ def getReservation(request, id):
 @login_required(login_url='/user/login/')
 def add_reservation(request):
     if request.method == 'POST':
-        form = RoomReservationForm(request.POST)
+        form = RoomReservationForm(request.POST or None, request.FILES or None)
         if form.is_valid():
             reservation = form.save(commit=False)
             reservation.created_by = request.user

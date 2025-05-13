@@ -23,3 +23,8 @@ def multiply(value, arg):
         return float(value) * float(arg)
     except (ValueError, TypeError):
         return 0
+
+
+@register.filter
+def get_range(start, end):
+    return range(start, end)

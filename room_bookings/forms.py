@@ -5,6 +5,7 @@ from django.utils import timezone
 from django import forms
 from .models import RoomType, Room
 
+
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
@@ -21,6 +22,7 @@ class CustomerForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
             'NIN': forms.TextInput(attrs={'class': 'form-control'}),
+            'profile_picture': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
 
@@ -46,7 +48,7 @@ class RoomReservationForm(forms.ModelForm):
         regex=r'^\+?1?\d{9,15}$',
         message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
     )
-    
+
     phone_number = forms.CharField(
         validators=[phone_regex],
         widget=forms.TextInput(attrs={
@@ -55,7 +57,7 @@ class RoomReservationForm(forms.ModelForm):
             'pattern': '^\+?[0-9]{9,15}$'
         })
     )
-    
+
     NIN = forms.CharField(
         label="National ID Number",
         widget=forms.TextInput(attrs={
@@ -67,13 +69,13 @@ class RoomReservationForm(forms.ModelForm):
     class Meta:
         model = RoomReservation
         fields = [
-            'room', 
+            'room',
             'customer',
             'email',
             'phone_number',
             'NIN',
-            'check_in_date', 
-            'check_out_date', 
+            'check_in_date',
+            'check_out_date',
             'special_requests'
         ]
         widgets = {
@@ -119,14 +121,17 @@ class RoomReservationForm(forms.ModelForm):
         cleaned_data = super().clean()
         check_in = cleaned_data.get('check_in_date')
         check_out = cleaned_data.get('check_out_date')
-        
+
         if check_in and check_out:
             if check_in < timezone.now().date():
-                raise forms.ValidationError("Check-in date cannot be in the past")
+                raise forms.ValidationError(
+                    "Check-in date cannot be in the past")
             if check_out <= check_in:
-                raise forms.ValidationError("Check-out date must be after check-in date")
-                
+                raise forms.ValidationError(
+                    "Check-out date must be after check-in date")
+
         return cleaned_data
+
 
 class RoomTypeForm(forms.ModelForm):
     class Meta:

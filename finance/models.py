@@ -6,7 +6,7 @@ from django.db import models
 class Revenue(models.Model):
     REVENUE_CHOICES = [
         ('rooms', 'Rooms'),
-        ('fnb', 'Food & Beverage'),
+        ('Food & Beverage', 'Food & Beverage'),
         ('party', 'Party'),
         ('other', 'Other')
     ]

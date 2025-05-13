@@ -166,22 +166,20 @@
             {{ staff.is_active|yesno:"Active,Inactive" }}
           </div>
         </div>
-            <div class="profile-section d-flex align-items-center gap-3 py-3">
-                {% if staff.profile_picture %}
-                    <img src="{{ staff.profile_picture.url }}" alt="{{ staff.first_name }} {{ staff.last_name }}"
-                        class="rounded-circle border object-fit-cover profile-img">
-                {% else %}
-                    <div class="d-flex align-items-center justify-content-center bg-light rounded-circle border profile-img">
-                        <i class="bi bi-person-circle fs-2 text-secondary"></i>
+   <div class="profile-section">
+                    {% if staff.profile_picture %}
+                    <img src="{{ staff.profile_picture.url }}" alt="{{ staff.first_name }} {{ staff.last_name }}" class="profile-image">
+                    {% else %}
+                    <div class="profile-image d-flex align-items-center justify-content-center bg-light">
+                        <i class="bi bi-person-circle" style="font-size: 3rem; color: #9ca3af;"></i>
                     </div>
-                {% endif %}
-
-                <div class="profile-info m-auto">
-                    <h5 class="mb-1">{{ staff.first_name }} {{ staff.last_name }}</h5>
-                    <p class="text-muted mb-1 small">{{ staff.email }}</p>
-                    <span class="badge bg-primary">{{ staff.position }}</span>
-                </div>
+                    {% endif %}
+                                <div class="profile-info">
+              <h4>{{ staff.first_name }} {{ staff.last_name }}</h4>
+              <p class="text-muted mb-2">{{ staff.email }}</p>
+              <div class="badge bg-primary">{{ staff.position }}</div>
             </div>
+          </div>
           <div class="details-section">
             <div class="detail-row">
               <div class="detail-label">Gender</div>
