@@ -17,6 +17,21 @@ class Revenue(models.Model):
     date = models.DateField()
 
 
+class Cost_of_sales(models.Model):
+    COST = [
+        ('retaurant', 'Retaurant'),
+        ('accomodation', 'Accomodation'),
+        ('party', 'Party'),
+        ('other', 'Other')
+    ]
+    name= models.CharField(max_length=100)
+    category = models.CharField(max_length=20, choices=COST)
+    description = models.TextField(max_length=200)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    drawn = models.CharField(max_length=30, default="staff")
+    date = models.DateField()
+
+
 class Expense(models.Model):
     EXPENCE_CHOICES = [
         ('staff', 'Salaries and Wages'),

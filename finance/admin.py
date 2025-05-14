@@ -4,6 +4,16 @@ from django.contrib import admin
 from .models import *
 
 
+@admin.register(Cost_of_sales)
+class Cost_of_goodsAdmin(admin.ModelAdmin):
+    list_display=[
+        'name', 'category','amount', 'description', 'date'
+        
+    ]
+    search_fields = [
+        'name', 'category', 'date'
+    ]
+
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
     list_display = [
