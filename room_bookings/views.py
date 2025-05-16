@@ -188,3 +188,18 @@ class RoomManagementView(View):
             'rooms': rooms,
         }
         return render(request, self.template_name, context)
+    
+    
+
+@login_required(login_url='/user/login/')
+def update_reservation_status(request, pk):
+    reservation = get_object_or_404(RoomReservation, pk=pk)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(RoomReservation.RESERVATION_STATUS_CHOICES):
+            reservation.status = new_status
+            reservation.save()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=405)

@@ -115,18 +115,38 @@ class RoomReservationForm(forms.ModelForm):
             'special_requests': 'Please mention any accessibility needs or preferences'
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Initially restrict to rooms that are marked as available
+        self.fields['room'].queryset = Room.objects.filter(is_available=True)
+
+        # Optionally, dynamically filter further once check-in/out are entered (for AJAX or custom views)
+        if 'check_in_date' in self.data and 'check_out_date' in self.data:
+            try:
+                check_in = self.data.get('check_in_date')
+                check_out = self.data.get('check_out_date')
+                if check_in and check_out:
+                    available_rooms = []
+                    for room in Room.objects.all():
+                        if room.check_availability(check_in, check_out):
+                            available_rooms.append(room.id)
+                    self.fields['room'].queryset = Room.objects.filter(id__in=available_rooms)
+            except Exception:
+                pass  # fallback to initial is_available=True
+
     def clean(self):
         cleaned_data = super().clean()
         check_in = cleaned_data.get('check_in_date')
         check_out = cleaned_data.get('check_out_date')
-        
+
         if check_in and check_out:
             if check_in < timezone.now().date():
                 raise forms.ValidationError("Check-in date cannot be in the past")
             if check_out <= check_in:
                 raise forms.ValidationError("Check-out date must be after check-in date")
-                
         return cleaned_data
+
 
 class RoomTypeForm(forms.ModelForm):
     class Meta:
@@ -153,4 +173,13 @@ class RoomForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'room_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'floor': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+        
+        
+class ReservationStatusUpdateForm(forms.ModelForm):
+    class Meta:
+        model = RoomReservation
+        fields = ['status']
+        widgets = {
+            'status': forms.Select(attrs={'class': 'form-select'}),
         }

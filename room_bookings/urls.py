@@ -12,6 +12,8 @@ urlpatterns=[
     path('add-customer/', add_customer, name='add_customer'),
     path('fetch_reservation_details/<int:reservation_id>/', fetch_reservation_details, name='fetch_reservation_details'),
     path('print_reservation/<int:id>/', print_reservation, name='print_reservation'),
+    path('reservations/<int:pk>/update-status/', update_reservation_status, name='update_reservation_status'),
+
     
     #Sauna
     path('sauna/', add_sauna, name = 'add_sauna'),

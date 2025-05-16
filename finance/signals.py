@@ -26,7 +26,7 @@ def create_revenue_from_order(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=RoomReservation)
 def add_revenue_on_check_in(sender, instance, created, **kwargs):
-    if instance.status == "Checked-In":
+    if instance.status != "Pending" and instance.status != "Cancelled":
         # Prevent duplicate revenue entries
         description = f"Room {instance.room.room_number} check-in - {instance.reservation_id}"
         if not Revenue.objects.filter(description=description).exists():
