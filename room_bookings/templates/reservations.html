@@ -317,216 +317,200 @@
 
         </div>
         <div class="table-container"></div>
-            <table class="table table-striped" style="font-size: 0.85rem;">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Room</th>
-                        <th>Customer</th>
-                        <th>Check-in Date</th>
-                        <th>Total Nights</th>
-                        <th>Status</th>
-                        <th>Reservation Date</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for reservation in reservations_list %}
-                    <tr class="reservation-row" data-status="{{ reservation.status }}"></tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>
-                            <span class="fw-medium">Room {{ reservation.room.room_number }}</span>
-                        </td>
-                        <td>
-                            {{ reservation.customer }}
-                        </td>
-                        <td>{{ reservation.check_in_date }}</td>
-                        <td>{{ reservation.total_nights }}</td>
-                        <td>
-                            {% if reservation.status == 'Confirmed' %}
-                            <span style="font-size: 10px;" class="badge badge-confirmed">
-                                <i class="fas fa-check-circle"></i>
-                                {{ reservation.status }}
-                            </span>
-                            {% elif reservation.status == 'Pending' %}
-                            <span style="font-size: 10px;" class="badge badge-pending">
-                                <i class="fas fa-clock"></i>
-                                {{ reservation.status }}
-                            </span>
-                            {% elif reservation.status == 'Cancelled' %}
-                            <span style="font-size: 10px;" class="badge badge-cancelled">
-                                <i class="fas fa-times-circle"></i>
-                                {{ reservation.status }}
-                            </span>
-                            {% elif reservation.status == 'Checked-In' %}
-                            <span style="font-size: 10px;" class="badge badge-checked-in">
-                                <i class="fas fa-door-open"></i>
-                                {{ reservation.status }}
-                            </span>
-                            {% elif reservation.status == 'Checked-Out' %}
-                            <span style="font-size: 10px;" class="badge badge-checked-out">
-                                <i class="fas fa-door-closed"></i>
-                                {{ reservation.status }}
-                            </span>
-                            {% else %}
-                            <span style="font-size: 10px;" class="badge badge-secondary">
-                                <i class="fas fa-question-circle"></i>
-                                {{ reservation.status }}
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>{{ reservation.reservation_date }}</td>
-                        <td class="text-center">
-                            <a href="/room_bookings/reservations/{{ reservation.id }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                                data-bs-target="#statusModal" data-id="{{ reservation.id }}"
-                                data-status="{{ reservation.status }}">
-                                <i class="fas fa-edit"></i> Update
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8">
-                            <div class="empty-state">
-                                <i class="fas fa-calendar-alt empty-state-icon"></i>
-                                <h5 class="empty-state-message">No Reservations Found</h5>
-                                <p class="empty-state-description">There are currently no reservations in the system.
-                                </p>
-                                <a href="/room_bookings/add-reservation/" class="btn btn-primary">
-                                    <i class="fas fa-plus-circle"></i> Make First Reservation
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <table class="table table-striped" style="font-size: 0.85rem;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Room</th>
+                    <th>Customer</th>
+                    <th>Check-in Date</th>
+                    <th>Total Nights</th>
+                    <th>Status</th>
+                    <th>Reservation Date</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations_list %}
+                <tr class="reservation-row" data-status="{{ reservation.status }}">
+                    <td>{{ forloop.counter }}</td>
+                    <td><span class="fw-medium">Room {{ reservation.room.room_number }}</span></td>
+                    <td>{{ reservation.customer }}</td>
+                    <td>{{ reservation.check_in_date }}</td>
+                    <td>{{ reservation.total_nights }}</td>
+                    <td>
+                        {% if reservation.status == 'Confirmed' %}
+                        <span class="badge badge-confirmed"><i class="fas fa-check-circle"></i> 
+                            {{ reservation.status}}</span>
+                        {% elif reservation.status == 'Pending' %}
+                        <span class="badge badge-pending"><i class="fas fa-clock"></i> {{ reservation.status }}</span>
+                        {% elif reservation.status == 'Cancelled' %}
+                        <span class="badge badge-cancelled"><i class="fas fa-times-circle"></i> 
+                            {{ reservation.status}}</span>
+                        {% elif reservation.status == 'Checked-In' %}
+                        <span class="badge badge-checked-in"><i class="fas fa-door-open"></i> 
+                            {{ reservation.status }}</span>
+                        {% elif reservation.status == 'Checked-Out' %}
+                        <span class="badge badge-checked-out"><i class="fas fa-door-closed"></i> 
+                            {{ reservation.status }}</span>
+                        {% else %}
+                        <span class="badge badge-secondary"><i class="fas fa-question-circle"></i> 
+                            {{ reservation.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ reservation.reservation_date }}</td>
+                    <td class="text-center">
+                        <a href="/room_bookings/reservations/{{ reservation.id }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                            data-bs-target="#statusModal" data-id="{{ reservation.id }}"
+                            data-status="{{ reservation.status }}">
+                            <i class="fas fa-edit"></i> Update Status
+                        </button>
 
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                {% if reservations_list.has_previous %}
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-alt empty-state-icon"></i>
+                            <h5 class="empty-state-message">No Reservations Found</h5>
+                            <p class="empty-state-description">There are currently no reservations in the system.
+                            </p>
+                            <a href="/room_bookings/add-reservation/" class="btn btn-primary">
+                                <i class="fas fa-plus-circle"></i> Make First Reservation
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if reservations_list.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="First">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ reservations_list.previous_page_number }}" aria-label="Previous">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in reservations_list.paginator.page_range %}
+            {% if page_num >= reservations_list.number|add:-2 and page_num <= reservations_list.number|add:2 %} <li
+                class="page-item {% if page_num == reservations_list.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% elif page_num == 1 or page_num == reservations_list.paginator.num_pages %}
                 <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="First">
-                        <i class="fas fa-angle-double-left"></i>
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                </li>
+                {% elif page_num == reservations_list.number|add:-3 or page_num == reservations_list.number|add:3 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% endfor %}
+
+                {% if reservations_list.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ reservations_list.next_page_number }}" aria-label="Next">
+                        <i class="fas fa-angle-right"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ reservations_list.previous_page_number }}"
-                        aria-label="Previous">
-                        <i class="fas fa-angle-left"></i>
+                    <a class="page-link" href="?page={{ reservations_list.paginator.num_pages }}" aria-label="Last">
+                        <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
                 {% endif %}
-
-                {% for page_num in reservations_list.paginator.page_range %}
-                {% if page_num >= reservations_list.number|add:-2 and page_num <= reservations_list.number|add:2 %} <li
-                    class="page-item {% if page_num == reservations_list.number %}active{% endif %}">
-                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-                    </li>
-                    {% elif page_num == 1 or page_num == reservations_list.paginator.num_pages %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-                    </li>
-                    {% elif page_num == reservations_list.number|add:-3 or page_num == reservations_list.number|add:3 %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    {% endif %}
-                    {% endfor %}
-
-                    {% if reservations_list.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ reservations_list.next_page_number }}" aria-label="Next">
-                            <i class="fas fa-angle-right"></i>
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ reservations_list.paginator.num_pages }}" aria-label="Last">
-                            <i class="fas fa-angle-double-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-            </ul>
-        </nav>
-    </div>
+        </ul>
+    </nav>
+</div>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="statusForm" method="POST">
-      {% csrf_token %}
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="statusModalLabel">Update Reservation Status</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="reservationIdInput" name="reservation_id">
-          <label for="statusSelect" class="form-label">Select Status</label>
-          <select name="status" id="statusSelect" class="form-select" required>
-            <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Cancelled">Cancelled</option>
-            <option value="Checked-In">Checked-In</option>
-            <option value="Checked-Out">Checked-Out</option>
-          </select>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Status</button>
-        </div>
-      </div>
-    </form>
-  </div>
+    <div class="modal-dialog">
+        <form id="statusForm" method="POST">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusModalLabel">Update Reservation Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reservationIdInput" name="reservation_id">
+                    <label for="statusSelect" class="form-label">Select Status</label>
+                    <select name="status" id="statusSelect" class="form-select" required>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Cancelled">Cancelled</option>
+                        <option value="Checked-In">Checked-In</option>
+                        <option value="Checked-Out">Checked-Out</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const statusModal = document.getElementById('statusModal');
-    const statusForm = document.getElementById('statusForm');
-    const statusSelect = document.getElementById('statusSelect');
-    const reservationIdInput = document.getElementById('reservationIdInput');
+    document.addEventListener("DOMContentLoaded", function () {
+        const statusModal = document.getElementById('statusModal');
+        const statusForm = document.getElementById('statusForm');
+        const statusSelect = document.getElementById('statusSelect');
+        const reservationIdInput = document.getElementById('reservationIdInput');
 
-    statusModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const reservationId = button.getAttribute('data-id');
-        const currentStatus = button.getAttribute('data-status');
+        statusModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const reservationId = button.getAttribute('data-id');
+            const currentStatus = button.getAttribute('data-status');
 
-        reservationIdInput.value = reservationId;
-        statusSelect.value = currentStatus;
-    });
+            reservationIdInput.value = reservationId;
+            statusSelect.value = currentStatus;
+        });
 
-    statusForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const reservationId = reservationIdInput.value;
-        const selectedStatus = statusSelect.value;
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        statusForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const reservationId = reservationIdInput.value;
+            const selectedStatus = statusSelect.value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        fetch(`/room_bookings/reservations/${reservationId}/update-status/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({ status: selectedStatus })
-        })
-        .then(response => {
-            if (response.ok) {
-                const modal = bootstrap.Modal.getInstance(statusModal);
-                modal.hide();
-                location.reload();
-            } else {
-                alert("Failed to update status.");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("An error occurred.");
+            fetch(`/room_bookings/reservations/${reservationId}/update-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ status: selectedStatus })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        const modal = bootstrap.Modal.getInstance(statusModal);
+                        modal.hide();
+                        location.reload();
+                    } else {
+                        alert("Failed to update status.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("An error occurred.");
+                });
         });
     });
-});
 </script>
 
 <!-- Font Awesome for icons -->
