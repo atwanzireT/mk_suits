@@ -10,6 +10,7 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'assets/images/logos/seodashlogo.png' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/styles.min.css' %}" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
     <style>
@@ -270,26 +271,26 @@
                                 <span class="hide-menu">Attendance Register</span>
                             </a>
                         </li>
-                            <li class="nav-small-cap">
+                        <li class="nav-small-cap">
                             <span class="hide-menu text-uppercase fw-bold text-muted">Financial Records</span>
                         </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="/finance/financial-report/" aria-expanded="false">
-                                    <span class="nav-icon">
-                                        <iconify-icon icon="mdi:finance" style="color: #2A6EBB;"></iconify-icon>
-                                    </span>
-                                    <span class="hide-menu">Finance</span>
-                                </a>
-                            </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="/finance/financial-report/" aria-expanded="false">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="mdi:finance" style="color: #2A6EBB;"></iconify-icon>
+                                </span>
+                                <span class="hide-menu">Finance</span>
+                            </a>
+                        </li>
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="/finance/all-assets/" aria-expanded="false">
                                 <span class="nav-icon">
-                                   <iconify-icon icon="lucide:banknote" style="color: #5cb85c;"></iconify-icon>
+                                    <iconify-icon icon="lucide:banknote" style="color: #5cb85c;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Assets</span>
                             </a>
                         </li>
-                                     <li class="sidebar-item">
+                        <li class="sidebar-item">
                             <a class="sidebar-link" href="/finance/all-liabilities/" aria-expanded="false">
                                 <span class="nav-icon">
                                     <iconify-icon icon="lucide:alert-octagon" style="color: #f0ad4e;"></iconify-icon>
@@ -297,15 +298,15 @@
                                 <span class="hide-menu">Liability</span>
                             </a>
                         </li>
-                                    <li class="sidebar-item">
+                        <li class="sidebar-item">
                             <a class="sidebar-link" href="/finance/all-revenue/" aria-expanded="false">
                                 <span class="nav-icon">
-                                   <iconify-icon icon="lucide:plus-circle" style="color: #0275d8;"></iconify-icon>
+                                    <iconify-icon icon="lucide:plus-circle" style="color: #0275d8;"></iconify-icon>
                                 </span>
                                 <span class="hide-menu">Revenue</span>
                             </a>
                         </li>
-                                    <li class="sidebar-item">
+                        <li class="sidebar-item">
                             <a class="sidebar-link" href="/finance/all-expense/" aria-expanded="false">
                                 <span class="nav-icon">
                                     <iconify-icon icon="lucide:receipt" style="color: #d9534f;"></iconify-icon>
@@ -326,7 +327,7 @@
                                 <span class="hide-menu">Reports</span>
                             </a>
                         </li>
-                         
+
 
                         <li class="nav-small-cap">
                             <span class="hide-menu text-uppercase fw-bold text-muted">Exit App</span>
@@ -394,19 +395,22 @@
                                 </a>
                                 <ul class=" dropdown-menu dropdown-menu-end" aria-labelledby="createDropdown">
                                     <li><a class="dropdown-item" href="/data/dining-areas/">Manage Dining</a></li>
-                                    <li><a class="dropdown-item" href="/data/categories/">Manage Menu Categories</a></li>
+                                    <li><a class="dropdown-item" href="/data/categories/">Manage Menu Categories</a>
+                                    </li>
                                     <li><a class="dropdown-item" href="/data/menu-items/">Manage Menu Items</a></li>
-                                    <li><a class="dropdown-item" href="/room_bookings/manage-rooms/">Manage Rooms</a></li>
-                                    
+                                    <li><a class="dropdown-item" href="/room_bookings/manage-rooms/">Manage Rooms</a>
+                                    </li>
+
                                     <li><a class="dropdown-item" href="/finance/revenue/add/">Manage Revenue</a></li>
                                     <li><a class="dropdown-item" href="/finance/expense/add/">Manage Expense</a></li>
                                     <li><a class="dropdown-item" href="/finance/asset/add/">Manage Assets</a></li>
-                                    <li><a class="dropdown-item" href="/finance/liability/add/">Manage Liability</a></li>
+                                    <li><a class="dropdown-item" href="/finance/liability/add/">Manage Liability</a>
+                                    </li>
                                     <li><a class="dropdown-item" href="/user/users/">Manage Users</a></li>
-                              
+
                                 </ul>
                             </li>
-f
+                            f
 
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2"
@@ -457,6 +461,8 @@ f
         </div>
     </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'assets/libs/jquery/dist/jquery.min.js' %}"></script>
     <script src="{% static 'assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'assets/libs/apexcharts/dist/apexcharts.min.js' %}"></script>

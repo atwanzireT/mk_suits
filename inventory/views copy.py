@@ -10,17 +10,10 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse, HttpResponseBadRequest
-from .models import OrderItem
 
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from core.models import Setting
 from .forms import *
 from .models import *
-from django.shortcuts import render, get_object_or_404
-from .models import OrderItem
 
 # Global today's date in correct timezone
 today = timezone.localdate()
@@ -174,7 +167,7 @@ def edit_order(request, id):
         form = OrderForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
-            return redirect('order_list')
+            return redirect('orders')
     else:
         form = OrderForm(instance=order)
     return render(request, 'edit_order.html', {'form': form})
@@ -187,6 +180,20 @@ def delete_order(request, id):
         order.delete()
         return redirect('orders')
     return render(request, 'delete_order.html', {'order': order})
+
+
+@login_required
+@require_POST
+def update_order_status(request, order_id):
+    order = get_object_or_404(OrderItem, id=order_id)
+    new_status = request.POST.get('status')
+    valid_statuses = dict(order._meta.get_field('status').choices)
+
+    if new_status in valid_statuses:
+        order.status = new_status
+        order.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
 
 
 # === ORDER TRANSACTIONS ===
@@ -241,23 +248,4 @@ def monthly_order_totals(request):
 @login_required
 def pos_reports(request):
     return render(request, "reports.html", {})
-
-
-
-@require_POST
-def update_order_status(request, order_id):
-    try:
-        order = get_object_or_404(OrderItem, pk=order_id)
-        status = request.POST.get("status")
-
-        if status not in dict(OrderItem._meta.get_field("status").choices):
-            return JsonResponse({"error": "Invalid status"}, status=400)
-
-        order.status = status
-        order.save()
-        return JsonResponse({"message": "Order status updated successfully"})
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
 

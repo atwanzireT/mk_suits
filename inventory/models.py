@@ -34,6 +34,9 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ['name']
 
 class DailySpecial(models.Model):
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
@@ -89,6 +92,8 @@ class OrderTransaction(models.Model):
             return f"Order {self.random_id} for Table {self.table.table_number} - {self.created}"
         else:
             return f"Order {self.random_id} - {self.created}"
+        
+
 
 
 
