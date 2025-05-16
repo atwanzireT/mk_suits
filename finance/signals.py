@@ -19,7 +19,8 @@ def create_revenue_from_order(sender, instance, created, **kwargs):
                 description=f"F&B Payment for Order {instance.random_id}",
                 amount=Decimal(total_amount),
                 received_from=instance.customer_name or "walk-in",
-                date=timezone.now().date()
+                date=timezone.now().date(),
+                created_by=instance.created_by,
             )
 
 
@@ -34,7 +35,8 @@ def add_revenue_on_check_in(sender, instance, created, **kwargs):
                 description=description,
                 amount=instance.total_price,
                 received_from=instance.customer or "Guest",
-                date=timezone.now().date()
+                date=timezone.now().date(),
+                created_by=instance.created_by,
             )
 
 
@@ -62,5 +64,6 @@ def add_revenue_on_service_completion(sender, instance, created, **kwargs):
                 description=description,
                 amount=instance.total_amount,
                 received_from=instance.client_name,
-                date=timezone.now().date()
+                date=timezone.now().date(),
+                created_by=instance.created_by,
             )
