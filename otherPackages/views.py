@@ -10,7 +10,7 @@ class PackageCreateView(CreateView):
     model = OtherPackage
     form_class = OtherPackageForm
     template_name = 'package_form.html'
-    success_url = '/packages/'
+    success_url = '/others/packages/'
 
     def get_form_kwargs(self):
         """Remove 'created_by' from the form kwargs"""

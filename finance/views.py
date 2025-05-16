@@ -7,15 +7,18 @@ from datetime import datetime, date
 from calendar import monthrange
 from django.contrib import messages
 from django.core.paginator import Paginator
-
+from django.utils import timezone
 from finance.models import Asset, Expense, Liability, Revenue
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404
+from room_bookings.models import Room
+from inventory.models import *
 
 # Create your views here.
 
+
 # Financial Documents
-
-
+@login_required(login_url='/user/login/')
 def get_income_statement(start_date, end_date):
     total_revenue = Revenue.objects.filter(date__range=(
         start_date, end_date)).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -29,6 +32,7 @@ def get_income_statement(start_date, end_date):
     }
 
 
+@login_required(login_url='/user/login/')
 def get_balance_sheet():
     total_assets = Asset.objects.aggregate(Sum('value'))['value__sum'] or 0
     total_liabilities = Liability.objects.aggregate(Sum('amount'))[
