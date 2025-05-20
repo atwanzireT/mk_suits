@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$_h+e-*%zteqo870ak_3wm*pft+u&q%^6i-ph$oy62!tm^==b%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -152,27 +152,30 @@ USE_TZ = True
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/user/login/'
 
-# STATIC_URL = '/static/'
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# # Media files (uploaded by users)
-# MEDIA_URL = '/media/'
+# Media files (uploaded by users)
+MEDIA_URL = '/media/'
 
-# # Directory to store uploaded media
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-STATIC_URL = 'static/'
-#STATICFILES_DIRS =['static/']
-STATIC_ROOT = BASE_DIR/'static'
-
-MEDIA_URL = 'media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR,'media')
-MEDIA_ROOT = BASE_DIR/'media'
-
+# Directory to store uploaded media
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# STATIC_URL = 'static/'
+# #STATICFILES_DIRS =['static/']
+# STATIC_ROOT = BASE_DIR/'static'
+
+# MEDIA_URL = 'media/'
+# # MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+# MEDIA_ROOT = BASE_DIR/'media'
+
+
+
+
