@@ -44,7 +44,7 @@ urlpatterns = [
     path('orders-transactions/csv/', export_orders_report, name='orders_report'),
     
 
-   
+    path("search-menu-items/", views.search_menu_items, name="search_menu_items"),
   
 
 ]

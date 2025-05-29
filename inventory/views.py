@@ -46,16 +46,20 @@ def dashboard(request):
 
 
 # === MENU ===
-@login_required(login_url='/user/login/')
-def menu(request):
-    menu_items = MenuItem.objects.select_related('category').all()
-    return render(request, "menuitem_list.html", {"menu_items": menu_items})
-
-
 def load_menu_items(request):
-    category_id = request.GET.get('category')
-    menu_items = MenuItem.objects.filter(category_id=category_id).values('id', 'name')
+    search_term = request.GET.get('term', '')  # optional: for search
+    menu_items = MenuItem.objects.filter(
+        name__icontains=search_term).values('id', 'name')[:10]
     return JsonResponse(list(menu_items), safe=False)
+
+
+def search_menu_items(request):
+    query = request.GET.get("q", "")
+    results = MenuItem.objects.filter(name__icontains=query)[:20]
+    data = [{"id": item.id, "name": item.name} for item in results]
+    return JsonResponse(data, safe=False)
+
+
 
 
 # === ORDERS ===
@@ -105,22 +109,29 @@ def order_transaction_payment(request, order_id):
 
 @login_required(login_url='/user/login/')
 def add_order(request):
-    unpaid_orders = OrderTransaction.objects.filter(created=today, payment_mode="NO PAYMENT").order_by('-id')
-    categories = Category.objects.all()
+    today = localdate()
+    # unpaid_orders = OrderTransaction.objects.all()
+    unpaid_orders = OrderTransaction.objects.filter(
+        created=today, payment_mode="NO PAYMENT").order_by('-id')
+    # last_transaction_order = unpaid_orders.first()  # Get the latest unpaid order
 
+    menu_items = MenuItem.objects.all().values('id', 'name', 'price')
     if request.method == 'POST':
         form = OrderTransactionForm(request.POST)
         if form.is_valid():
-            transaction = form.save(commit=False)
-            transaction.created_by = request.user
-            transaction.save()
+            order_transaction = form.save(commit=False)
+            order_transaction.created_by = request.user
+            order_transaction.save()
+            # Ensure 'add_order' is a valid URL name.
             return redirect('add_order')
     else:
         form = OrderTransactionForm()
 
     return render(request, 'add_order.html', {
         'form': form,
-        'categories': categories,
+
+        'all_menu_items': menu_items,
+        # 'last_transaction_order': last_transaction_order,
         'unpaid_orders': unpaid_orders,
     })
 
@@ -128,35 +139,49 @@ def add_order(request):
 @csrf_exempt
 @login_required(login_url='/user/login/')
 def submit_orders(request):
-    if request.method != 'POST':
-        return JsonResponse({"error": "Invalid request method"}, status=405)
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            order_id = data.get("random_id")
+            customer_name = data.get("customer_name")
+            order_type = data.get("order_type")
+            status = data.get("status")
+            special_notes = data.get("special_notes")
+            orders = data.get("orders", [])
 
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-        order_id = data.get("random_id")
-        orders = data.get("orders", [])
-        if not orders:
-            return JsonResponse({"error": "No menu items selected"}, status=400)
+            if not orders:
+                return JsonResponse({"error": "No menu items selected"}, status=400)
 
-        order_transaction = OrderTransaction.objects.get(random_id=order_id)
-        for order in orders:
-            menu_item = MenuItem.objects.get(id=order["menu_item_id"])
-            OrderItem.objects.create(
-                order=order_transaction,
-                menu_item=menu_item,
-                customer_name=data.get("customer_name"),
-                quantity=order["quantity"],
-                status=data.get("status"),
-                special_notes=data.get("special_notes"),
-                order_type=data.get("order_type")
-            )
-        return JsonResponse({"message": "Orders placed successfully!", "redirect_url": "/manager/orders_transactions/"})
-    except OrderTransaction.DoesNotExist:
-        return JsonResponse({"error": "Order transaction not found"}, status=404)
-    except MenuItem.DoesNotExist:
-        return JsonResponse({"error": "Menu item not found"}, status=404)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+            # Fetch the order transaction
+            try:
+                order_transaction = OrderTransaction.objects.get(
+                    random_id=order_id)
+            except OrderTransaction.DoesNotExist:
+                return JsonResponse({"error": "Order transaction not found"}, status=404)
+
+            # Create multiple order items
+            for order in orders:
+                try:
+                    menu_item = MenuItem.objects.get(id=order["menu_item_id"])
+                    OrderItem.objects.create(
+                        order=order_transaction,
+                        menu_item=menu_item,
+                        customer_name=customer_name,
+                        quantity=order["quantity"],
+                        status=status,
+                        special_notes=special_notes,
+                        order_type=order_type
+                    )
+                except MenuItem.DoesNotExist:
+                    return JsonResponse({"error": f"Menu item with ID {order['menu_item_id']} not found"}, status=404)
+
+            # Return JSON response with redirect URL
+            return JsonResponse({"message": "Orders placed successfully!", "redirect_url": "/manager/orders_transactions/"})
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
 # === ORDER MANAGEMENT ===
