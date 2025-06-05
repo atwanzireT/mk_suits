@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Asset, Liability, Expense, Revenue  
+from .models import Asset, Budget, Liability, Expense, Revenue  
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
     list_display = ['name', 'value', 'purchase_date', 'is_active'] 
@@ -23,3 +23,12 @@ class RevenueAdmin(admin.ModelAdmin):
     list_display = ['category', 'description', 'amount', 'received_from', 'date', 'is_active']
     search_fields = ['category', 'received_from', 'description']
     list_filter = ['category', 'is_active', 'date']
+    
+
+@admin.register(Budget)
+class BudgetAdmin(admin.ModelAdmin):
+    list_display = ('month', 'year', 'revenue_estimate',
+                    'expense_estimate', 'created_by', 'created_at')
+    list_filter = ('month', 'year')
+    search_fields = ('created_by__username',)
+    ordering = ('-year', '-month')

@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'staff',
     'api',
     'finance',
+    'store',
 ]
 
 
@@ -157,8 +158,6 @@ USE_TZ = True
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/user/login/'
-
-
 
 
 # Static files (CSS, JavaScript, Images)
