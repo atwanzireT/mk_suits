@@ -7,11 +7,13 @@ from calendar import monthrange
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
-from finance.models import Asset, Expense, Liability, Revenue
+from finance.models import Asset, Budget, Expense, Liability, Revenue
 from django.db.models import Sum
 from room_bookings.models import Room
 from inventory.models import *
 from datetime import date
+from django.utils.timezone import now
+from decimal import Decimal
 
 
 # Financial Documents
@@ -239,6 +241,58 @@ def add_asset(request):
     return render(request, 'add_asset.html', {'form': form})
 
 
+@login_required
+def asset_detail(request, id):
+    asset = Asset.objects.get(id=id)
+
+    # Compute depreciation values
+    if asset.purchase_date and asset.life_years:
+        years_elapsed = max(0, (date.today().year - asset.purchase_date.year))
+        depreciation_per_year = asset.value / asset.life_years
+        total_depreciation = min(
+            depreciation_per_year * years_elapsed, asset.value)
+        current_value = asset.value - total_depreciation
+    else:
+        depreciation_per_year = 0
+        total_depreciation = 0
+        current_value = asset.value
+
+    context = {
+        'asset': asset,
+        'depreciation_per_year': depreciation_per_year,
+        'total_depreciation': total_depreciation,
+        'current_value': current_value
+    }
+
+    return render(request, 'asset_detail.html', context)
+    
+@login_required
+def register_depreciation(request):
+    current_year = now().year
+    for asset in Asset.objects.filter(is_active=True):
+        yearly_depreciation = asset.depreciation_per_year()
+
+        # Check if depreciation already exists for this asset this year
+        if not Expense.objects.filter(
+            description__icontains=asset.name,
+            category='depreciation',
+            date__year=current_year
+        ).exists():
+
+            Expense.objects.create(
+                description=f"Depreciation for {asset.name} ({current_year})",
+                amount=Decimal(yearly_depreciation),
+                date=date.today(),
+                category='depreciation',
+                created_by=request.user,
+                updated_by=request.user
+            )
+
+    messages.success(
+        request, "Depreciation for current year registered as expense.")
+    return redirect('assets')
+
+
 @login_required(login_url='/user/login/')
 def add_liability(request):
     form = LiabilityForm(request.POST or None, request.FILES or None)
@@ -274,37 +328,36 @@ def liabities(request):
 
 @login_required(login_url='/user/login/')
 def revenue(request):
-    # Get date range from query params
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    category = request.GET.get('category')
 
-    revenue_list = Revenue.objects.filter(is_active=True).order_by('-date')
+    revenues = Revenue.objects.filter(is_active=True)
 
-    # Filter by date range if provided
-    if start_date and end_date:
-        try:
-            start = datetime.strptime(start_date, "%Y-%m-%d").date()
-            end = datetime.strptime(end_date, "%Y-%m-%d").date()
-            revenue_list = revenue_list.filter(date__range=(start, end))
-        except ValueError:
-            pass  # Handle invalid date input silently
+    if start_date:
+        revenues = revenues.filter(date__gte=start_date)
+    if end_date:
+        revenues = revenues.filter(date__lte=end_date)
+    if category:
+        revenues = revenues.filter(category=category)
 
-    # Calculate total amount
-    total_revenue = revenue_list.aggregate(total=Sum('amount'))['total'] or 0
+    total_revenue = revenues.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Pagination
-    paginator = Paginator(revenue_list, 10)
+    # Paginate if needed
+    from django.core.paginator import Paginator
+    paginator = Paginator(revenues.order_by('-date'), 20)
     page_number = request.GET.get('page')
-    revenue_page = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        "revenue_list": revenue_page,
-        "total_revenue": total_revenue,
-        "start_date": start_date,
-        "end_date": end_date,
+        'revenue_list': page_obj,
+        'start_date': start_date,
+        'end_date': end_date,
+        'selected_category': category,
+        'total_revenue': total_revenue,
+        'revenue_choices': Revenue.REVENUE_CHOICES,
     }
-    return render(request, "revenue.html", context)
-
+    return render(request, 'revenue.html', context)
 
 @login_required(login_url='/user/login/')
 def expense(request):
@@ -334,3 +387,45 @@ def expense(request):
         "end_date": end_date,
     }
     return render(request, "expense.html", context)
+
+
+def budget_report(request, year=None, month=None):
+    today = date.today()
+    year = year or today.year
+    month = month or today.month
+
+    # Budget lines for selected month
+    budget = Budget.objects.filter(month=month, year=year).first()
+    budget_lines = budget.lines.all() if budget else []
+
+    # Actual revenue by category
+    actual_revenue = Revenue.objects.filter(
+        date__year=year, date__month=month
+    ).values('category').annotate(total=Sum('amount'))
+
+    actual_expenses = Expense.objects.filter(
+        date__year=year, date__month=month
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # Organize actuals for easy comparison
+    actuals = {item['category']: item['total'] for item in actual_revenue}
+    actuals['expense'] = actual_expenses
+
+    # Merge budget with actuals
+    comparison = []
+    for line in budget_lines:
+        actual = actuals.get(line.category, 0)
+        comparison.append({
+            'category': line.get_category_display(),
+            'budgeted': line.estimated_amount,
+            'actual': actual,
+            'variance': actual - line.estimated_amount,
+        })
+
+    context = {
+        'budget': budget,
+        'comparison': comparison,
+        'month': month,
+        'year': year,
+    }
+    return render(request, 'finance/budget_report.html', context)

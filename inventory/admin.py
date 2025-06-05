@@ -5,7 +5,7 @@ from .models import (
 # Register models with custom admin classes
 @admin.register(OrderTransaction)
 class OrderTransactionAdmin(admin.ModelAdmin):
-    list_display = ['random_id', 'customer_name',
+    list_display = ['random_id', 'customer_name', 'served_by',
                     'payment_mode', 'created_by', 'created']
     search_fields = ['random_id', 'customer_name']
 

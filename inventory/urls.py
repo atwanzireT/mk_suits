@@ -1,4 +1,6 @@
 from django.urls import path
+
+from inventory.generate_csv_reports.order_csv_report import export_orders_to_csv, export_reservations_to_csv
 from . import views
 from inventory.generate_pdfs.create_invoice import print_order_invoice
 from inventory.generate_pdfs.create_order import print_order
@@ -19,7 +21,7 @@ urlpatterns = [
     path('orders/', views.orders, name='order_list'),
     path('add-order/', views.add_order, name='add_order'),
     path("submit-orders/", views.submit_orders, name="submit_orders"),
-    path('order/edit/<int:id>/', views.edit_order, name='edit_order'),
+    path('order/edit/<int:id>/', views.edit_order_item, name='edit_order'),
     path('orders/<str:id>/', views.getOrder, name='get_order'),
     path('print_order/<int:id>/', print_order, name='print_order'),
     path('print_receipt/<int:order_id>/', print_order_receipt, name='print_order_receipt'),
@@ -37,6 +39,10 @@ urlpatterns = [
     
     # Reports
     path('reports/', views.pos_reports, name="pos_reports"),
+    path('export-orders/<str:time_period>/',
+         export_orders_to_csv, name='export_orders'),
+    path('export_csv/reservations/<str:time_period>/',
+         export_reservations_to_csv, name='export_reservations'),
     
     # path('export-orders/', export_orders_to_csv, name='export_order_items'),
     path('paid-orders/', export_paid_order_to_csv, name='paid-orders'),

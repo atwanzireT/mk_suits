@@ -30,10 +30,11 @@ class ExpenseForm(forms.ModelForm):
 class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
-        fields = ['name', 'value', 'purchase_date', 'attachment'] 
+        fields = ['name', 'value','life_years', 'purchase_date', 'attachment'] 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'value': forms.NumberInput(attrs={'class': 'form-control'}),
+            'life_years':forms.NumberInput(attrs={'class':'form-control'}),
             'purchase_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}), 
             'attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }

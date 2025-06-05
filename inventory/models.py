@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import random
+from django.utils.timezone import now
 from decimal import Decimal, InvalidOperation
 
 def generate_random_id():
@@ -73,10 +74,12 @@ class OrderTransaction(models.Model):
     )
     random_id = models.CharField(max_length=6, unique=True, editable=False, default=generate_random_id)
     customer_name = models.CharField(max_length=255, blank=True, null=True, default="Customer")
+    served_by = models.CharField(
+        max_length=255, blank=True, null=True, default="Waitress")
     dining_area = models.ForeignKey(DiningArea, on_delete=models.SET_NULL, null=True, blank=True)
     table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True, blank=True )
     special_notes = models.TextField(default="Null")
-    created = models.DateField(auto_now_add=True, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
     payment_mode = models.CharField(default="NO PAYMENT", max_length=50, choices=pay_mode)
     transaction_id = models.CharField(blank=True, null=True, max_length=100, help_text="Transaction ID / Invoice Number")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

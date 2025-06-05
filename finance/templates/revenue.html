@@ -7,25 +7,31 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-semibold mb-0">Revenue Income</h4>
-            
         </div>
 
         <!-- Filter Form -->
-<!-- Filter Form -->
-<form method="get" class="row g-3 align-items-end mb-4">
-    <div class="col-md-4">
-        <label for="start_date" class="form-label">Start Date</label>
-        <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
-    </div>
-    <div class="col-md-4">
-        <label for="end_date" class="form-label">End Date</label>
-        <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
-    </div>
-</form>
-
+        <form method="get" class="row g-3 align-items-end mb-4">
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="category" class="form-label">Category</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">All</option>
+                    {% for code, name in revenue_choices %}
+                        <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
 
         <!-- Revenue Table -->
         <div class="table-responsive">
@@ -67,8 +73,7 @@
             <ul class="pagination justify-content-center">
                 {% if revenue_list.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?start_date={{ start_date }}&end_date={{ end_date }}&page={{ revenue_list.previous_page_number }}">Previous</a>
-
+                        <a class="page-link" href="?start_date={{ start_date }}&end_date={{ end_date }}&category={{ selected_category }}&page={{ revenue_list.previous_page_number }}">Previous</a>
                     </li>
                 {% endif %}
 
@@ -77,12 +82,12 @@
                 </li>
 
                 {% if revenue_list.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?start_date={{ start_date }}&end_date={{ end_date }}&page={{ revenue_list.next_page_number }}">Next</a>
-                </li>
-            {% endif %}
+                    <li class="page-item">
+                        <a class="page-link" href="?start_date={{ start_date }}&end_date={{ end_date }}&category={{ selected_category }}&page={{ revenue_list.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
     </div>
 </div>
-{% endblock  %}
+{% endblock %}

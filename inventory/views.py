@@ -1,5 +1,6 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
+from pyexpat.errors import messages
 
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
@@ -12,15 +13,18 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest
+import pytz
 from .models import OrderItem
 
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from core.models import Setting
 from .forms import *
+
 from .models import *
 from django.shortcuts import render, get_object_or_404
 from .models import OrderItem
+from django.db.models.functions import Lower
 
 # Global today's date in correct timezone
 today = timezone.localdate()
@@ -29,21 +33,117 @@ today = timezone.localdate()
 # === DASHBOARD ===
 @login_required(login_url='/user/login/')
 def dashboard(request):
-    start_of_today = timezone.make_aware(datetime.combine(today, datetime.min.time()))
-    end_of_today = timezone.make_aware(datetime.combine(today + timedelta(days=1), datetime.min.time()))
+    kampala_tz = pytz.timezone('Africa/Kampala')
+    now_kampala = timezone.now().astimezone(kampala_tz)
 
-    orderTodayCount = OrderItem.objects.filter(order_date__range=(start_of_today, end_of_today)).count()
+    # Determine business day based on whether it's before or after 10 AM
+    if now_kampala.time() < time(10, 0):
+        business_day = now_kampala.date() - timedelta(days=1)
+    else:
+        business_day = now_kampala.date()
+
+    # Business day starts at 8:00 AM of the determined day and ends at 7:59 AM the next day
+    start_local = datetime.combine(business_day, time(8, 0, 0))
+    end_local = datetime.combine(
+        business_day + timedelta(days=1), time(7, 59, 59))
+
+    start_local = kampala_tz.localize(start_local)
+    end_local = kampala_tz.localize(end_local)
+
+    # Convert to UTC for DB filtering
+    start_utc = start_local.astimezone(pytz.UTC)
+    end_utc = end_local.astimezone(pytz.UTC)
+
+
+
+    date_range = (start_utc, end_utc)
+
+    orderTodayCount = OrderItem.objects.filter(
+        order_date__range=date_range).count()
     orderCount = OrderItem.objects.count()
-    today_total_amount = OrderItem.objects.filter(order_date__range=(start_of_today, end_of_today)).aggregate(total=Sum('total_price'))['total'] or 0
-    orders = OrderItem.objects.select_related('menu_item').order_by('-order_date')[:5]
+
+    today_total_amount = OrderItem.objects.filter(order_date__range=date_range) \
+                                          .aggregate(total=Sum('total_price'))['total'] or 0
+
+    recent_orders = OrderItem.objects.filter(order_date__range=date_range) \
+                                     .select_related('menu_item') \
+                                     .order_by('-order_date')[:5]
+
+    most_ordered_items = (
+        OrderItem.objects.filter(order_date__range=date_range)
+        .values('menu_item__name')
+        .annotate(total_quantity=Sum('quantity'))
+        .order_by('-total_quantity')[:10]
+    )
+
+    total_customers = (
+        OrderTransaction.objects
+        .exclude(customer_name__isnull=True)
+        .exclude(customer_name__exact='')
+        .values('customer_name')
+        .distinct()
+        .count()
+    )
+
+    customers_today = (
+        OrderTransaction.objects
+        .filter(created__range=date_range)
+        .exclude(customer_name__isnull=True)
+        .exclude(customer_name__exact='')
+        .values('customer_name')
+        .distinct()
+        .count()
+    )
+
+    waiter_summary = (
+        OrderTransaction.objects
+        .filter(created__range=date_range)
+        .filter(served_by__isnull=False)
+        .exclude(served_by__exact='')
+        .annotate(waiter_name=Lower('served_by'))
+        .values('waiter_name')
+        .annotate(transaction_count=Count('id'))
+        .order_by('-transaction_count')
+    )
+
+    waiter_labels = [w['waiter_name'] for w in waiter_summary]
+    waiter_counts = [w['transaction_count'] for w in waiter_summary]
+
+    top_customer_order = (
+        OrderItem.objects.filter(order_date__range=date_range)
+        .values('order__customer_name', 'order__random_id')
+        .annotate(total_order_value=Sum('total_price'))
+        .order_by('-total_order_value')
+        .first()
+    )
+
+    top_customer_overall = (
+        OrderItem.objects.filter(order_date__range=date_range)
+        .values('order__customer_name')
+        .annotate(
+            total_spent=Sum('total_price'),
+            order_count=Count('order', distinct=True)
+        )
+        .order_by('-total_spent')
+        .first()
+    )
 
     return render(request, "dashboard.html", {
         "orderTodayCount": orderTodayCount,
         "orderCount": orderCount,
-        "orders": orders,
+        "orders": recent_orders,
         "today_total_amount": today_total_amount,
+        "most_ordered_items": most_ordered_items,
+        "waiter_summary": waiter_summary,
+        "top_customer_order": top_customer_order,
+        "top_customer_overall": top_customer_overall,
+        'waiter_labels': waiter_labels,
+        'waiter_counts': waiter_counts,
+        "total_customers": total_customers,
+        "customers_today": customers_today,
+        "business_start": start_local,
+        "business_end": end_local,
     })
-
 
 # === MENU ===
 def load_menu_items(request):
@@ -109,12 +209,20 @@ def order_transaction_payment(request, order_id):
 
 @login_required(login_url='/user/login/')
 def add_order(request):
-    today = localdate()
-    # unpaid_orders = OrderTransaction.objects.all()
-    unpaid_orders = OrderTransaction.objects.filter(
-        created=today, payment_mode="NO PAYMENT").order_by('-id')
-    # last_transaction_order = unpaid_orders.first()  # Get the latest unpaid order
+    # Get local date and convert to start and end of day in UTC
+    kampala_tz = pytz.timezone("Africa/Kampala")
+    today_local = timezone.now().astimezone(kampala_tz).date()
 
+    start_of_day = kampala_tz.localize(datetime.combine(today_local, time.min))
+    end_of_day = kampala_tz.localize(datetime.combine(today_local, time.max))
+
+    start_utc = start_of_day.astimezone(pytz.UTC)
+    end_utc = end_of_day.astimezone(pytz.UTC)
+
+    unpaid_orders = OrderTransaction.objects.filter(
+        created__range=(start_utc, end_utc),
+        payment_mode="NO PAYMENT"
+    ).order_by('-id')
     menu_items = MenuItem.objects.all().values('id', 'name', 'price')
     if request.method == 'POST':
         form = OrderTransactionForm(request.POST)
@@ -192,21 +300,26 @@ def getOrder(request, id):
     return render(request, "getorder.html", {"order": order, "setting": settings})
 
 
-@login_required
-def edit_order(request, id):
-    order = get_object_or_404(OrderItem, id=id)
+@login_required(login_url='/user/login/')
+def edit_order_item(request, id):
+    order_item = get_object_or_404(OrderItem, id=id)
+
     if request.method == 'POST':
-        form = OrderForm(request.POST, instance=order)
+        form = OrderUpdateForm(request.POST, instance=order_item)
         if form.is_valid():
             form.save()
+            # change to your actual redirect target
             return redirect('order_list')
     else:
-        form = OrderForm(instance=order)
-    return render(request, 'edit_order.html', {'form': form})
+        form = OrderUpdateForm(instance=order_item)
 
+    return render(request, 'edit_order.html', {'form': form, 'order_item': order_item})
 
 @login_required
 def delete_order(request, id):
+    
+    
+    
     order = get_object_or_404(OrderItem, id=id)
     if request.method == 'POST':
         order.delete()
@@ -284,5 +397,6 @@ def update_order_status(request, order_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 

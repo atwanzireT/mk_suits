@@ -50,34 +50,44 @@ class Expense(models.Model):
     def __str__(self):
         return f"Expense: {self.description} - {self.amount}"
 
+
 class Asset(models.Model):
     name = models.CharField(max_length=255)
-    value = models.DecimalField(max_digits=12, decimal_places=2)
+    value = models.DecimalField(
+        max_digits=12, decimal_places=2)  # Original value
     purchase_date = models.DateField(null=True, blank=True)
-    life_years = models.PositiveIntegerField(null=True, blank=True)  # expected lifespan for depreciation
+    life_years = models.PositiveIntegerField(null=True, blank=True)
     category = models.CharField(max_length=100, blank=True, null=True)
-    attachment = models.FileField(upload_to='attachments/%Y/%m/%d/', blank=True, null=True)
+    attachment = models.FileField(
+        upload_to='attachments/%Y/%m/%d/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-                                   null=True, blank=True, related_name='+')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-                                   null=True, blank=True, related_name='+')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+
+    def depreciation_per_year(self):
+        if self.life_years and self.value:
+            return self.value / self.life_years
+        return 0
+
+    def years_elapsed(self):
+        if self.purchase_date:
+            return max(0, date.today().year - self.purchase_date.year)
+        return 0
+
+    def total_depreciation(self):
+        return min(self.depreciation_per_year() * self.years_elapsed(), self.value)
+
+    def current_value(self):
+        return max(self.value - self.total_depreciation(), 0)
 
     @property
     def depreciation_amount(self):
-        """Compute depreciation based on value, life_years, and purchase_date."""
-        if self.value and self.life_years and self.purchase_date:
-            years_passed = (date.today() - self.purchase_date).days / 365.0
-            per_year = self.value / self.life_years  # straight-line depreciation per year
-            depreciated = per_year * years_passed
-            # Cap depreciation between 0 and the asset's value
-            depreciated = max(0, min(depreciated, self.value))
-            return round(depreciated, 2)
-        return 0.0
+        return self.total_depreciation()
 
     def __str__(self):
-        return f"Asset: {self.name} - {self.value}"
-
+        return f"{self.name} - Current Value: {self.current_value()}"
 
 
 class Liability(models.Model):
@@ -115,3 +125,41 @@ class Liability(models.Model):
         verbose_name = "Liability"
         verbose_name_plural = "Liabilities"
         ordering = ["-due_date", "-id"]
+
+
+class Budget(models.Model):
+    MONTH_CHOICES = [(i, i) for i in range(1, 13)]
+
+    month = models.PositiveIntegerField(choices=MONTH_CHOICES)
+    year = models.PositiveIntegerField()
+    revenue_estimate = models.DecimalField(max_digits=12, decimal_places=2)
+    expense_estimate = models.DecimalField(max_digits=12, decimal_places=2)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('month', 'year')
+
+    def __str__(self):
+        return f"Budget: {self.month}/{self.year}"
+
+
+class BudgetLine(models.Model):
+    CATEGORY_CHOICES = [
+        ('fnb', 'F&B'),
+        ('rooms', 'Room Bookings'),
+        ('other', 'Other Packages'),
+        ('expense', 'Expenses'),
+    ]
+    budget = models.ForeignKey(
+        Budget, on_delete=models.CASCADE, related_name='lines')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    estimated_amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.get_category_display()} - {self.estimated_amount}"

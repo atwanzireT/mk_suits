@@ -74,6 +74,14 @@
             >
             {{ form.customer_name }}
           </div>
+          <div class="col-md-5">
+            <label
+              for="{{ form.customer_name.id_for_label }}"
+              class="form-label"
+              >Service Name</label
+            >
+            {{ form.served_by }}
+          </div>
 
           <div class="col-md-5">
             <label for="{{ form.table.id_for_label }}" class="form-label"
