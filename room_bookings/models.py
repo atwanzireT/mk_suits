@@ -199,3 +199,18 @@ class SaunaUser(models.Model):
 
     def __str__(self):
         return self.customer_name
+
+class Booking(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    contact = models.CharField(max_length=15)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    check_in = models.DateField()
+    check_out = models.DateField()
+    guests = models.IntegerField()
+    special_requests = models.TextField(blank=True, null=True)
+
+
+    def __str__(self):
+        return f"{self.room} booking from {self.check_in} to {self.check_out}"

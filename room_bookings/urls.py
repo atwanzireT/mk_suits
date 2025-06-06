@@ -29,5 +29,9 @@ urlpatterns=[
     # Reports
     path('report/csv/', generate_reservations_report, name='reservations_report'),
     path('<int:reservation_id>/pdf/', generate_reservation_pdf, name='reservation_pdf'),
+    
+    # Booking
+    path('booking/', roomBooking, name='room_booking'),
+    path('booking/create/', create_booking, name='create_booking'),
 
 ]
