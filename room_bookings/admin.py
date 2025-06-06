@@ -1,14 +1,12 @@
 from django.contrib import admin
 from .models import (
      RoomType,
-    HotelBranch, Room, Customer, RoomReservation, SaunaUser, Sauna_services
+    HotelBranch, Room, Customer, RoomReservation, SaunaUser, Sauna_services, Booking
 )
 
 admin.site.register(SaunaUser)
 admin.site.register(Sauna_services)
-
-
-
+admin.site.register(Booking)
 
 @admin.register(RoomType)
 class RoomTypeAdmin(admin.ModelAdmin):
