@@ -28,14 +28,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '159.223.126.144',
-    'mkeerisuites.com',
-    'www.mkeerisuites.com'
-]
-
 
 # Application definition
 
@@ -50,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'otherPackages',
     'core',
+    'store',
     'inventory',
     'web',
     'kitchen',
@@ -57,7 +50,6 @@ INSTALLED_APPS = [
     'staff',
     'api',
     'finance',
-    'store',
 ]
 
 
@@ -155,22 +147,29 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/user/login/'
 
+STATIC_URL = '/static/'
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-STATIC_URL = 'static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'),
-# ]
-STATIC_ROOT = BASE_DIR/'static'
+# Media files (uploaded by users)
+MEDIA_URL = '/media/'
 
-
-MEDIA_URL = 'media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR,'media')
-MEDIA_ROOT = BASE_DIR/'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+
+
