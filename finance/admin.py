@@ -1,5 +1,6 @@
+from .models import Budget, BudgetLine
 from django.contrib import admin
-from .models import Asset, Budget, Liability, Expense, Revenue  
+from .models import Asset, Budget, Liability, Expense, Revenue, BudgetLine
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
     list_display = ['name', 'value', 'purchase_date', 'is_active'] 
@@ -27,8 +28,40 @@ class RevenueAdmin(admin.ModelAdmin):
 
 @admin.register(Budget)
 class BudgetAdmin(admin.ModelAdmin):
-    list_display = ('month', 'year', 'revenue_estimate',
-                    'expense_estimate', 'created_by', 'created_at')
-    list_filter = ('month', 'year')
-    search_fields = ('created_by__username',)
-    ordering = ('-year', '-month')
+    list_display = [
+        'month',
+        'year',
+        'revenue_estimate',
+        'actual_revenue_total',
+        'revenue_variance',
+        'expense_estimate',
+        'actual_expense_total',
+        'expense_variance',
+        'created_by',
+        'created_at',
+    ]
+    list_filter = ['month', 'year']
+    search_fields = ['created_by__username']
+    ordering = ['-year', '-month']
+
+    def actual_revenue_total(self, obj):
+        return sum(line.estimated_amount for line in obj.lines.all() if line.category in ['fnb', 'rooms', 'other'])
+    actual_revenue_total.short_description = 'Actual Revenue'
+
+    def revenue_variance(self, obj):
+        return self.actual_revenue_total(obj) - obj.revenue_estimate
+    revenue_variance.short_description = 'Revenue Variance'
+
+    def actual_expense_total(self, obj):
+        return sum(line.estimated_amount for line in obj.lines.all() if line.category == 'expense')
+    actual_expense_total.short_description = 'Actual Expense'
+
+    def expense_variance(self, obj):
+        return self.actual_expense_total(obj) - obj.expense_estimate
+    expense_variance.short_description = 'Expense Variance'
+
+
+@admin.register(BudgetLine)
+class BudgetLineAdmin(admin.ModelAdmin):
+    list_display = ['budget', 'category', 'actual_amount', 'estimated_amount']
+    search_fields = ['budget__year', 'budget__month', 'category']

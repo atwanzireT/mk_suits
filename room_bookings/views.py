@@ -275,3 +275,53 @@ def create_booking(request):
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
     return redirect('room_booking')
+
+def booked_rooms(request):
+    bookings = Booking.objects.all().order_by('booking_date')
+    paginator = Paginator(bookings, 10)
+    
+    page_number= request.GET.get('page')
+    
+    bookings =  paginator.get_page(page_number)
+    return render(request, 'booked_rooms.html', {'bookings':bookings})
+
+
+def booking_detail(request, id):
+    booking = get_object_or_404(Booking, id=id)
+
+    return render(request, 'booking_detail.html', {'booking': booking})
+
+#Convert booking to Reservations
+
+
+def convert_to_reservation(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Prevent double‐reservation
+    if hasattr(booking, 'reservation'):
+        # Already converted
+        return redirect('booking_detail', booking_id=booking.id)
+
+    # Create the reservation
+    RoomReservation.objects.create(
+        booking=booking,
+        check_in=timezone.make_aware(
+            timezone.datetime.combine(
+                booking.check_in, timezone.datetime.min.time())
+        ),
+        check_out=timezone.make_aware(
+            timezone.datetime.combine(
+                booking.check_out, timezone.datetime.min.time())
+        ),
+    )
+
+    # Optionally flip booking.status
+    booking.status = 'reserved'
+    booking.save()
+
+    return redirect('reservation_detail', reservation_id=booking.reservation.id)
+
+
+def reservation_detail(request, reservation_id):
+    reservation = get_object_or_404(RoomReservation, id=reservation_id)
+    return render(request, 'reservation_detail.html', {'reservation': reservation})

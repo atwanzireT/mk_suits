@@ -1,0 +1,97 @@
+{% extends 'base.html' %} 
+{% load humanize %} 
+{% block content %}
+<div>
+    <h2>Unit Costing Report</h2>
+
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-md-3">
+          <label for="start_date" class="form-label">Start Date</label>
+          <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+        </div>
+      
+        <div class="col-md-3">
+          <label for="end_date" class="form-label">End Date</label>
+          <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+        </div>
+      
+        <div class="col-md-3">
+          <label for="category" class="form-label">Expense Category</label>
+          <select name="category" id="category" class="form-select">
+            <option value="">All</option>
+            {% for code, name in expense_choices %}
+              <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      
+        <div class="col-md-2">
+          <label for="revenue_type" class="form-label">Revenue Type</label>
+          <select name="revenue_type" id="revenue_type" class="form-select">
+            <option value="all" {% if selected_revenue == 'all' %}selected{% endif %}>All</option>
+            <option value="room" {% if selected_revenue == 'room' %}selected{% endif %}>Room Reservations</option>
+            <option value="order" {% if selected_revenue == 'order' %}selected{% endif %}>Order Transactions</option>
+            <option value="other" {% if selected_revenue == 'other' %}selected{% endif %}>Other Revenue</option>
+          </select>
+        </div>
+      
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+      </form>
+      
+      
+      {% if report %}
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Units</th>
+            <th>Total Cost</th>
+            <th>Cost per Unit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if report.room %}
+            <tr>
+              <td>Room Reservations</td>
+              <td>{{ report.room.units }}</td>
+              <td>${{ report.room.total_cost }}</td>
+              <td>${{ report.room.unit_cost }}</td>
+            </tr>
+          {% endif %}
+          {% if report.orders %}
+            <tr>
+              <td>Order Transactions</td>
+              <td>{{ report.orders.units }}</td>
+              <td>${{ report.orders.total_cost }}</td>
+              <td>${{ report.orders.unit_cost }}</td>
+            </tr>
+          {% endif %}
+          {% if report.others %}
+            <tr>
+              <td>Other Revenue</td>
+              <td>{{ report.others.units }}</td>
+              <td>${{ report.others.total_cost }}</td>
+              <td>${{ report.others.unit_cost }}</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    
+      <div class="mt-4">
+        <h5>Summary</h5>
+        <ul class="list-group">
+          <li class="list-group-item"><strong>Total Customers Served:</strong> {{ report.summary.total_units }}</li>
+          <li class="list-group-item"><strong>Total Expense (All):</strong> ${{ report.summary.total_expense }}</li>
+        </ul>
+      </div>
+    {% else %}
+      <p>No data available for the selected filters.</p>
+    {% endif %}
+    
+    
+    
+</div>
+
+{% endblock %}

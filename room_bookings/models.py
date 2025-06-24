@@ -201,6 +201,12 @@ class SaunaUser(models.Model):
         return self.customer_name
 
 class Booking(models.Model):
+    STATUS = [
+        ('new', 'New'),
+        ('reserved', 'Converted to Reservation'),
+        ('cancelled', 'Cancelled'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS, default='new')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -209,8 +215,12 @@ class Booking(models.Model):
     check_in = models.DateField()
     check_out = models.DateField()
     guests = models.IntegerField()
+    booking_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     special_requests = models.TextField(blank=True, null=True)
 
 
     def __str__(self):
         return f"{self.room} booking from {self.check_in} to {self.check_out}"
+    
+    
+    

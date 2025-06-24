@@ -1,0 +1,17 @@
+{% extends "base.html" %} 
+{% block content %}
+<h2>Budget: {{ budget }}</h2>
+<p>Estimated Revenue: {{ budget.revenue_estimate }}</p>
+<p>Estimated Expenses: {{ budget.expense_estimate }}</p>
+<p>Actual Revenue (range): {{ actual_revenue }}</p>
+<p>Actual Expense (range): {{ actual_expense }}</p>
+
+<h3>Lines</h3>
+<ul>
+  {% for line in lines %}
+    <li>{{ line.category }} - {{ line.estimated_amount }}</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'budget_line_create' budget.id %}">Add Budget Line</a>
+{% endblock %}
