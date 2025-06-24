@@ -33,5 +33,10 @@ urlpatterns=[
     # Booking
     path('booking/', roomBooking, name='room_booking'),
     path('booking/create/', create_booking, name='create_booking'),
-
+    path('booked_rooms/', booked_rooms, name='booked_rooms'),
+    path('each_bookings/<int:id>/',
+         booking_detail, name='booking_detail'),
+    path('reservations/<int:reservation_id>/',
+         reservation_detail, name='reservation_detail'),
 ]
+
