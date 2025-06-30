@@ -47,8 +47,8 @@
           <tr>
             <th>Service</th>
             <th>Units</th>
-            <th>Total Cost</th>
-            <th>Cost per Unit</th>
+            <th>SHS Total Cost</th>
+            <th> SHS Cost per Unit </th>
           </tr>
         </thead>
         <tbody>
@@ -56,24 +56,24 @@
             <tr>
               <td>Room Reservations</td>
               <td>{{ report.room.units }}</td>
-              <td>${{ report.room.total_cost }}</td>
-              <td>${{ report.room.unit_cost }}</td>
+              <td>{{ report.room.total_cost|intcomma  }}</td>
+              <td>{{ report.room.unit_cost|intcomma  }}</td>
             </tr>
           {% endif %}
           {% if report.orders %}
             <tr>
               <td>Order Transactions</td>
               <td>{{ report.orders.units }}</td>
-              <td>${{ report.orders.total_cost }}</td>
-              <td>${{ report.orders.unit_cost }}</td>
+              <td>{{ report.orders.total_cost|intcomma }}</td>
+              <td>{{ report.orders.unit_cost|intcomma }}</td>
             </tr>
           {% endif %}
           {% if report.others %}
             <tr>
               <td>Other Revenue</td>
               <td>{{ report.others.units }}</td>
-              <td>${{ report.others.total_cost }}</td>
-              <td>${{ report.others.unit_cost }}</td>
+              <td>{{ report.others.total_cost|intcomma  }}</td>
+              <td>{{ report.others.unit_cost|intcomma  }}</td>
             </tr>
           {% endif %}
         </tbody>
@@ -82,8 +82,8 @@
       <div class="mt-4">
         <h5>Summary</h5>
         <ul class="list-group">
-          <li class="list-group-item"><strong>Total Customers Served:</strong> {{ report.summary.total_units }}</li>
-          <li class="list-group-item"><strong>Total Expense (All):</strong> ${{ report.summary.total_expense }}</li>
+          <li class="list-group-item"><strong>Total Customers Served:</strong> {{ report.summary.total_units|intcomma  }}</li>
+          <li class="list-group-item"><strong>Total Expense (All):</strong> {{ report.summary.total_expense|intcomma  }}</li>
         </ul>
       </div>
     {% else %}
