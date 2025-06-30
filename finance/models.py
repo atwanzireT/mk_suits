@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Sum
 from datetime import date
 
 class Revenue(models.Model):
@@ -142,8 +143,35 @@ class Budget(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+
     class Meta:
         unique_together = ('month', 'year')
+
+    @property
+    def actual_revenue_range(self):
+        if self.start_date and self.end_date:
+            return Revenue.objects.filter(
+                date__range=(self.start_date, self.end_date)
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        return 0
+
+    @property
+    def actual_expense_range(self):
+        if self.start_date and self.end_date:
+            return Expense.objects.filter(
+                date__range=(self.start_date, self.end_date)
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        return 0
+
+    @property
+    def revenue_variance(self):
+        return self.actual_revenue_range - self.revenue_estimate
+
+    @property
+    def expense_variance(self):
+        return self.expense_estimate - self.actual_expense_range
 
     def __str__(self):
         return f"Budget: {self.month}/{self.year}"
@@ -160,6 +188,8 @@ class BudgetLine(models.Model):
         Budget, on_delete=models.CASCADE, related_name='lines')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
     estimated_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    actual_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0)
 
     def __str__(self):
         return f"{self.get_category_display()} - {self.estimated_amount}"

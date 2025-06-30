@@ -6,6 +6,7 @@ from decimal import Decimal
 from inventory.models import OrderTransaction
 from room_bookings.models import RoomReservation, Sauna_services
 from otherPackages.models import OtherPackage
+from .models import Budget, BudgetLine
 
 @receiver(post_save, sender=OrderTransaction)
 def create_revenue_from_order(sender, instance, created, **kwargs):
@@ -67,3 +68,41 @@ def add_revenue_on_service_completion(sender, instance, created, **kwargs):
                 date=timezone.now().date(),
                 created_by=instance.created_by,
             )
+            
+@receiver(post_save, sender=Revenue)
+def update_budget_line_actual(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    revenue_date = instance.date or timezone.now().date()
+    month = revenue_date.month
+    year = revenue_date.year
+
+    from calendar import monthrange
+    from datetime import date
+
+    first_day = date(year, month, 1)
+    last_day = date(year, month, monthrange(year, month)[1])
+
+    # Get or create budget
+    budget, _ = Budget.objects.get_or_create(
+        month=month,
+        year=year,
+        defaults={
+            'revenue_estimate': 0,
+            'expense_estimate': 0,
+            'start_date': first_day,
+            'end_date': last_day
+        }
+    )
+
+    # Get or create budget line
+    line, _ = BudgetLine.objects.get_or_create(
+        budget=budget,
+        category=instance.category,
+        defaults={'estimated_amount': 0, 'actual_amount': 0}
+    )
+
+    # Update actual amount
+    line.actual_amount += instance.amount
+    line.save()

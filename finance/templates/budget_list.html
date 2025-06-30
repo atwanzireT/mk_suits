@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Budget Overview</h2>
+
+    <!-- Date Range Filter -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}" class="form-control">
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{% url 'budget_list' %}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Budget Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Revenue Estimate</th>
+                    <th>Actual Revenue</th>
+                    <th>Revenue Variance</th>
+                    <th>Expense Estimate</th>
+                    <th>Actual Expense</th>
+                    <th>Expense Variance</th>
+                    <th>Created By</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+                {% for budget in budgets %}
+                <tr>
+                    <td>{{ budget.created_at|date:"Y-m-d" }}</td>
+
+                    <td>{{ budget.revenue_estimate }}</td>
+                    <td>{{ budget.actual_revenue_range }}</td>
+                    <td class="{% if budget.revenue_variance < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ budget.revenue_variance }}
+                    </td>
+                    <td>{{ budget.expense_estimate }}</td>
+                    <td>{{ budget.actual_expense_range }}</td>
+                    <td class="{% if budget.expense_variance < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ budget.expense_variance }}
+                    </td>
+                    <td>{{ budget.created_by }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center">No budgets found for this date range.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

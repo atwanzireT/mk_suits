@@ -14,6 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest
 import pytz
+
+from room_bookings.models import RoomReservation
 from .models import OrderItem
 
 from django.views.decorators.http import require_POST
@@ -61,6 +63,14 @@ def dashboard(request):
     orderTodayCount = OrderItem.objects.filter(
         order_date__range=date_range).count()
     orderCount = OrderItem.objects.count()
+    
+    reservationTodayCount = RoomReservation.objects.filter(
+        reservation_date__range=date_range).count()
+    reservationCount = RoomReservation.objects.count()
+    
+    today_reservetotal_amount = RoomReservation.objects.filter(reservation_date__range=date_range) \
+        .aggregate(total=Sum('total_price'))['total'] or 0
+
 
     today_total_amount = OrderItem.objects.filter(order_date__range=date_range) \
                                           .aggregate(total=Sum('total_price'))['total'] or 0
@@ -143,6 +153,10 @@ def dashboard(request):
         "customers_today": customers_today,
         "business_start": start_local,
         "business_end": end_local,
+        'reservationTodayCount': reservationTodayCount,
+        'reservationCount': reservationCount,
+        "today_reservetotal_amount": today_reservetotal_amount
+        
     })
 
 # === MENU ===

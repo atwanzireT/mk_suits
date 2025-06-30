@@ -1,6 +1,8 @@
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import RevenueForm, ExpenseForm, AssetForm, LiabilityForm
+
+from otherPackages.models import OtherPackage
+from .forms import *
 from django.contrib.auth.decorators import login_required
 from datetime import date, datetime
 from calendar import monthrange
@@ -9,7 +11,7 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from finance.models import Asset, Budget, Expense, Liability, Revenue
 from django.db.models import Sum
-from room_bookings.models import Room
+from room_bookings.models import Room, RoomReservation
 from inventory.models import *
 from datetime import date
 from django.utils.timezone import now
@@ -363,16 +365,19 @@ def revenue(request):
 def expense(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    category = request.GET.get('category')
 
     expense_list = Expense.objects.filter(is_active=True).order_by('-date')
 
-    if start_date and end_date:
-        try:
-            start = datetime.strptime(start_date, "%Y-%m-%d").date()
-            end = datetime.strptime(end_date, "%Y-%m-%d").date()
-            expense_list = expense_list.filter(date__range=(start, end))
-        except ValueError:
-            pass  # Invalid dates will be ignored
+
+    if start_date:
+        expense_list = expense_list.filter(date__gte=start_date)
+    if end_date:
+        expense_list = expense_list.filter(date__lte=end_date)
+    if category:
+        expense_list = expense_list.filter(category=category)
+
+
 
     total_expense = expense_list.aggregate(total=Sum('amount'))['total'] or 0
 
@@ -382,50 +387,244 @@ def expense(request):
 
     context = {
         "expense_list": expense_page,
+        'selected_category': category,
         "total_expense": total_expense,
         "start_date": start_date,
         "end_date": end_date,
+        'expense_choices': Expense.EXPENCE_CHOICES,
+        
     }
     return render(request, "expense.html", context)
 
 
-def budget_report(request, year=None, month=None):
-    today = date.today()
-    year = year or today.year
-    month = month or today.month
 
-    # Budget lines for selected month
-    budget = Budget.objects.filter(month=month, year=year).first()
-    budget_lines = budget.lines.all() if budget else []
+#Budget
 
-    # Actual revenue by category
-    actual_revenue = Revenue.objects.filter(
-        date__year=year, date__month=month
-    ).values('category').annotate(total=Sum('amount'))
 
-    actual_expenses = Expense.objects.filter(
-        date__year=year, date__month=month
+def get_actual_revenue_by_category(self, category):
+    return Revenue.objects.filter(
+        date__year=self.year,
+        date__month=self.month,
+        category=category,
+        is_active=True
     ).aggregate(total=Sum('amount'))['total'] or 0
 
-    # Organize actuals for easy comparison
-    actuals = {item['category']: item['total'] for item in actual_revenue}
-    actuals['expense'] = actual_expenses
 
-    # Merge budget with actuals
-    comparison = []
-    for line in budget_lines:
-        actual = actuals.get(line.category, 0)
-        comparison.append({
+def get_actual_expenses(self):
+    return Expense.objects.filter(
+        date__year=self.year,
+        date__month=self.month,
+        is_active=True
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+
+def get_actual_expense_by_category(self, category):
+    return Expense.objects.filter(
+        date__year=self.year,
+        date__month=self.month,
+        category=category,
+        is_active=True
+    ).aggregate(total=Sum('amount'))['total'] or 0
+ 
+ #budget comparison 
+def get_budget_overview(self):
+    data = []
+    for line in self.lines.all():
+        if line.category == 'expense':
+            actual = self.get_actual_expenses()
+        else:
+            actual = self.get_actual_revenue_by_category(line.category)
+        data.append({
             'category': line.get_category_display(),
-            'budgeted': line.estimated_amount,
+            'estimated': line.estimated_amount,
             'actual': actual,
-            'variance': actual - line.estimated_amount,
+            'difference': actual - line.estimated_amount
         })
+    return data
 
-    context = {
+
+def budget_list(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    budgets = Budget.objects.all()
+
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
+            budgets = budgets.filter(created_at__range=(start, end))
+        except ValueError:
+            pass
+
+    return render(request, 'budget_list.html', {
+        'budgets': budgets,
+    })
+
+def budget_create(request):
+    if request.method == 'POST':
+        form = BudgetForm(request.POST)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.created_by = request.user
+            budget.save()
+            return redirect('budget_list')
+    else:
+        form = BudgetForm()
+    return render(request, 'budget_form.html', {'form': form})
+
+def budget_detail(request, pk):
+    budget = get_object_or_404(Budget, pk=pk)
+    lines = budget.lines.all()
+    return render(request, 'budget_detail.html', {
         'budget': budget,
-        'comparison': comparison,
-        'month': month,
-        'year': year,
+        'lines': lines,
+        'actual_revenue': budget.actual_revenue_range(),
+        'actual_expense': budget.actual_expense_range()
+    })
+
+def budget_line_create(request, budget_id):
+    budget = get_object_or_404(Budget, id=budget_id)
+    if request.method == 'POST':
+        form = BudgetLineForm(request.POST)
+        if form.is_valid():
+            line = form.save(commit=False)
+            line.budget = budget
+            line.save()
+            return redirect('budget_detail', pk=budget.id)
+    else:
+        form = BudgetLineForm(initial={'budget': budget})
+    return render(request, 'budgetline_form.html', {'form': form, 'budget': budget})
+
+
+# unit costing
+ROOM_EXPENSE_CATEGORIES = ['utilities', 'repairs', 'supplies']
+ORDER_EXPENSE_CATEGORIES = ['fnb']
+SHARED_EXPENSE_CATEGORIES = ['staff', 'admin',
+                             'marketing', 'finance', 'depreciation', 'other']
+
+
+def calculate_unit_costing(start_date, end_date, include_room=True, include_order=True, include_other=True, selected_category=None):
+    report = {}
+    total_units = 0
+
+    # Expense base filter
+    expense_filter = {'date__range': (start_date, end_date)}
+    if selected_category:
+        expense_filter['category'] = selected_category
+
+    # Expense aggregations
+    room_expenses = Expense.objects.filter(
+        **expense_filter, category__in=ROOM_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+    order_expenses = Expense.objects.filter(
+        **expense_filter, category__in=ORDER_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+    shared_expenses = Expense.objects.filter(
+        **expense_filter, category__in=SHARED_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+
+    # Revenue units
+    room_count = RoomReservation.objects.filter(reservation_date__range=(
+        start_date, end_date)).count() if include_room else 0
+    order_count = OrderTransaction.objects.filter(created__range=(
+        start_date, end_date)).count() if include_order else 0
+    other_count = OtherPackage.objects.filter(created_at__range=(
+        start_date, end_date)).count() if include_other else 0
+
+    total_units = room_count + order_count + other_count
+
+    # Avoid divide-by-zero
+    room_share = Decimal(room_count) / \
+        Decimal(total_units) if total_units > 0 else Decimal(0)
+    order_share = Decimal(order_count) / \
+        Decimal(total_units) if total_units > 0 else Decimal(0)
+    other_share = Decimal(other_count) / \
+        Decimal(total_units) if total_units > 0 else Decimal(0)
+
+    total_expense_used = room_expenses + order_expenses + shared_expenses
+
+    # Room Cost
+    if include_room and room_count:
+        room_total_cost = room_expenses + (shared_expenses * room_share)
+        room_unit_cost = room_total_cost / Decimal(room_count)
+        report['room'] = {
+            'units': room_count,
+            'unit_cost': round(room_unit_cost, 2),
+            'total_cost': round(room_total_cost, 2)
+        }
+
+    # Order Cost
+    if include_order and order_count:
+        order_total_cost = order_expenses + (shared_expenses * order_share)
+        order_unit_cost = order_total_cost / Decimal(order_count)
+        report['orders'] = {
+            'units': order_count,
+            'unit_cost': round(order_unit_cost, 2),
+            'total_cost': round(order_total_cost, 2)
+        }
+
+    # Other Cost
+    if include_other and other_count:
+        other_total_cost = shared_expenses * other_share
+        other_unit_cost = other_total_cost / Decimal(other_count)
+        report['others'] = {
+            'units': other_count,
+            'unit_cost': round(other_unit_cost, 2),
+            'total_cost': round(other_total_cost, 2)
+        }
+
+    # Summary
+    report['summary'] = {
+        'total_units': total_units,
+        'total_expense': round(total_expense_used, 2)
     }
-    return render(request, 'finance/budget_report.html', context)
+
+    return report
+
+
+
+
+def unit_costing_report(request):
+    from datetime import date
+   
+
+    # Date filters
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+    selected_category = request.GET.get('category')
+    selected_revenue = request.GET.get(
+        'revenue_type', 'all')  # default to 'all'
+
+    # Parse dates
+    try:
+        start_date = date.fromisoformat(
+            start_date_str) if start_date_str else date.today().replace(day=1)
+        end_date = date.fromisoformat(
+            end_date_str) if end_date_str else date.today()
+    except ValueError:
+        start_date = date.today().replace(day=1)
+        end_date = date.today()
+
+    # Determine which categories to include
+    include_room = selected_revenue in ['all', 'room']
+    include_order = selected_revenue in ['all', 'order']
+    include_other = selected_revenue in ['all', 'other']
+
+    # Calculate report
+    report = calculate_unit_costing(
+        start_date,
+        end_date,
+        include_room,
+        include_order,
+        include_other,
+        selected_category
+    )
+
+    expense_choices = Expense.EXPENCE_CHOICES
+
+    return render(request, 'unit_costing.html', {
+        'report': report,
+        'start_date': start_date,
+        'end_date': end_date,
+        'expense_choices': expense_choices,
+        'selected_category': selected_category,
+        'selected_revenue': selected_revenue,
+        'request': request,
+    })

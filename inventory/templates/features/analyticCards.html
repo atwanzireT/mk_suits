@@ -38,8 +38,8 @@
             
                         <!-- Content section -->
                         <div class="p-4 w-100 d-flex flex-column justify-content-center">
-                            <p class="text-muted mb-1 fw-medium small text-uppercase tracking-wide">Total Orders </p>
-                            <h2 class="fw-bold mb-1 text-primary">{{orderCount}} </h2>
+                            <p class="text-muted mb-1 fw-medium small text-uppercase tracking-wide">Total Reservations </p>
+                            <h2 class="fw-bold mb-1 text-primary">{{reservationCount}} </h2>
                             <div class="d-flex align-items-center">
                                 <iconify-icon icon="lucide:trending-up" class="text-success me-1" style="font-size: 14px;"></iconify-icon>
                                 <small class="text-success fw-medium">All time</small>
@@ -48,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            >
+            
         </div>
 
         <!-- Today's Orders -->
@@ -61,8 +61,8 @@
                             <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient opacity-25" style="background: linear-gradient(135deg, #2ea44f, #28a745);"></div>
                         </div>
                         <div class="p-4 w-100 d-flex flex-column justify-content-center">
-                            <p class="text-muted mb-1 fw-medium small text-uppercase tracking-wide">Today's Orders</p>
-                            <h2 class="fw-bold mb-1 text-success">{{ orderTodayCount }}</h2>
+                            <p class="text-muted mb-1 fw-medium small text-uppercase tracking-wide">Today's Reservations</p>
+                            <h2 class="fw-bold mb-1 text-success">{{ reservationTodayCount }}</h2>
                             <div class="d-flex align-items-center">
                                 <iconify-icon icon="lucide:clock" class="text-info me-1" style="font-size: 14px;"></iconify-icon>
                                 <small class="text-info fw-medium">Last 24 hours</small>
@@ -84,7 +84,7 @@
                                 </div>
                                         <div class="p-4 w-100 d-flex flex-column justify-content-center">
                     <p class="text-muted mb-1 fw-medium small text-uppercase tracking-wide"> TODAY'S  COLLECTION</p>
-                    <h2 class="fw-bold mb-1 text-warning">UGX {{ today_total_amount|intcomma }}</h2>
+                    <h2 class="fw-bold mb-1 text-warning">UGX {{ today_reservetotal_amount|intcomma }}</h2>
                     <div class="d-flex align-items-center">
                         <iconify-icon icon="lucide:dollar-sign" class="text-warning me-1" style="font-size: 14px;"></iconify-icon>
                         <small class="text-warning fw-medium">Daily earnings</small>
