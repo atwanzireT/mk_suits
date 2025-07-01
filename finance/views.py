@@ -496,7 +496,7 @@ def budget_line_create(request, budget_id):
     return render(request, 'budgetline_form.html', {'form': form, 'budget': budget})
 
 
-# unit costing
+#UNIT COSTING
 ROOM_EXPENSE_CATEGORIES = ['utilities', 'repairs', 'supplies']
 ORDER_EXPENSE_CATEGORIES = ['fnb']
 SHARED_EXPENSE_CATEGORIES = ['staff', 'admin',
@@ -579,41 +579,30 @@ def calculate_unit_costing(start_date, end_date, include_room=True, include_orde
     return report
 
 
-
-
 def unit_costing_report(request):
     from datetime import date
-   
 
-    # Date filters
-    start_date_str = request.GET.get('start_date')
-    end_date_str = request.GET.get('end_date')
-    selected_category = request.GET.get('category')
-    selected_revenue = request.GET.get(
-        'revenue_type', 'all')  # default to 'all'
+    # Get GET params safely
+    start_date_str = request.GET.get('start_date') or None
+    end_date_str = request.GET.get('end_date') or None
+    selected_category = request.GET.get('category') or None
+    selected_revenue = request.GET.get('revenue_type') or 'all'  # FIXED
 
     # Parse dates
     try:
-        start_date = date.fromisoformat(
-            start_date_str) if start_date_str else date.today().replace(day=1)
-        end_date = date.fromisoformat(
-            end_date_str) if end_date_str else date.today()
+        start_date = date.fromisoformat(start_date_str) if start_date_str else date.today().replace(day=1)
+        end_date = date.fromisoformat(end_date_str) if end_date_str else date.today()
     except ValueError:
         start_date = date.today().replace(day=1)
         end_date = date.today()
 
-    # Determine which categories to include
     include_room = selected_revenue in ['all', 'room']
     include_order = selected_revenue in ['all', 'order']
     include_other = selected_revenue in ['all', 'other']
 
-    # Calculate report
     report = calculate_unit_costing(
-        start_date,
-        end_date,
-        include_room,
-        include_order,
-        include_other,
+        start_date, end_date,
+        include_room, include_order, include_other,
         selected_category
     )
 
