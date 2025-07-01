@@ -14,16 +14,7 @@
           <label for="end_date" class="form-label">End Date</label>
           <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
         </div>
-      
-        <div class="col-md-3">
-          <label for="category" class="form-label">Expense Category</label>
-          <select name="category" id="category" class="form-select">
-            <option value="">All</option>
-            {% for code, name in expense_choices %}
-              <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+
       
         <div class="col-md-2">
           <label for="revenue_type" class="form-label">Revenue Type</label>
@@ -79,13 +70,13 @@
         </tbody>
       </table>
     
-      <div class="mt-4">
+      <!-- <div class="mt-4">
         <h5>Summary</h5>
         <ul class="list-group">
           <li class="list-group-item"><strong>Total Customers Served:</strong> {{ report.summary.total_units|intcomma  }}</li>
           <li class="list-group-item"><strong>Total Expense (All):</strong> {{ report.summary.total_expense|intcomma  }}</li>
         </ul>
-      </div>
+      </div> -->
     {% else %}
       <p>No data available for the selected filters.</p>
     {% endif %}
