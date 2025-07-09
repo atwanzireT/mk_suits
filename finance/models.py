@@ -36,6 +36,7 @@ class Expense(models.Model):
         ('finance', 'Finance Costs'),
         ('depreciation', 'Depreciation'),
         ('other', 'Other'),
+        ('other_pack','Other_Packages')
 
     ]
     description = models.CharField(max_length=255)

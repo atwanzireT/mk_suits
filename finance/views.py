@@ -499,8 +499,9 @@ def budget_line_create(request, budget_id):
 #UNIT COSTING
 ROOM_EXPENSE_CATEGORIES = ['utilities', 'repairs', 'supplies']
 ORDER_EXPENSE_CATEGORIES = ['fnb']
-SHARED_EXPENSE_CATEGORIES = ['staff', 'admin',
-                             'marketing', 'finance', 'depreciation', 'other']
+OTHER_PACKAGES_CATEGORIES = ['other_pack']
+SHARED_EXPENSE_CATEGORIES = [ 'admin',
+                             'marketing', 'finance', 'other']
 
 
 def calculate_unit_costing(start_date, end_date, include_room=True, include_order=True, include_other=True, selected_category=None):
@@ -517,6 +518,9 @@ def calculate_unit_costing(start_date, end_date, include_room=True, include_orde
         **expense_filter, category__in=ROOM_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
     order_expenses = Expense.objects.filter(
         **expense_filter, category__in=ORDER_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+    other_expenses = Expense.objects.filter(
+        **expense_filter, category__in=OTHER_PACKAGES_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+
     shared_expenses = Expense.objects.filter(
         **expense_filter, category__in=SHARED_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
 
@@ -538,7 +542,7 @@ def calculate_unit_costing(start_date, end_date, include_room=True, include_orde
     other_share = Decimal(other_count) / \
         Decimal(total_units) if total_units > 0 else Decimal(0)
 
-    total_expense_used = room_expenses + order_expenses + shared_expenses
+    total_expense_used = room_expenses + order_expenses + other_expenses + shared_expenses
 
     # Room Cost
     if include_room and room_count:
