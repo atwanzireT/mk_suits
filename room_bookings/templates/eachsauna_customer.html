@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize%}
 
 {% block content %}
 <div class="card" id="receipt">
@@ -42,7 +43,7 @@
                                     
                                     <td>{{ customer.service }}</td>
                                     <td>{{ customer.keys }}</td>
-                                    <td>{{ customer.price }}</td>
+                                    <td>{{ customer.price|intcomma }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -63,12 +64,11 @@
 
 
 
-                    <div class="col-auto">
-                        <a href="/manager/print_sauna_order/{{customer.id}}/" class="btn btn-primary no-print">
-                            
-
-                            Print Receipt</a>
-                            </div>
+                    <div class="row">
+                        <div class="col-auto">
+                            <button onclick="printReceiptDiv()" class="btn btn-primary no-print">Print Receipt</button>
+                        </div>
+                    </div>
 
 
                 </div>
@@ -77,6 +77,40 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Store total price as a JavaScript variable for calculation
+    const totalPrice = parseFloat("{{ total_price|floatformat:2 }}") || 0;
+
+    function calculateBalance() {
+        const amountGiven = parseFloat(document.getElementById('amountGiven').value) || 0;
+        const balance = amountGiven - totalPrice;
+
+        document.getElementById('balance').value = balance >= 0 ? balance.toFixed(2) : 'Insufficient amount';
+    }
+
+    // Enable button only when amount is entered
+    document.getElementById('amountGiven').addEventListener('input', function () {
+        document.querySelector('button[onclick="calculateBalance()"]').disabled = !this.value;
+    });
+
+    function printReceiptDiv() {
+        var receiptContent = document.getElementById("receipt").innerHTML;
+        var printWindow = window.open("", "", "height=600,width=800");
+        printWindow.document.write('<html><head><title>Print Receipt</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('@media print { body { font-family: Arial; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #000; padding: 5px; } .no-print { display: none; } }');
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(receiptContent);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    }
+</script>
+
 
 {% endblock content %}
 
@@ -88,7 +122,8 @@
             visibility: hidden;
         }
 
-        #receipt, #receipt * {
+        #receipt,
+        #receipt * {
             visibility: visible;
         }
 
