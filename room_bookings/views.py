@@ -47,11 +47,17 @@ def rooms_filter(request, id):
     rooms = Room.objects.filter(room_type=id, is_available=True)
     return render(request, "rooms.html", {"rooms": rooms})
 
+
+# reservations/views.py
+# def reservation_list(request):
+#     reservations = RoomReservation.objects.select_related('booking').all()
+#     return render(request, 'reservations/list.html', {'reservations': reservations})
+
+
 # ROOM RESERVATION LIST VIEW
 @login_required(login_url='/user/login/')
 def reservation(request):
-    reservations = RoomReservation.objects.all().select_related('room')
-    reservations_list = RoomReservation.objects.all().select_related('room').order_by('-reservation_date')
+    reservations_list = RoomReservation.objects.all().select_related('booking').order_by('-reservation_date')
     paginator = Paginator(reservations_list, 10)
     
     # Get the page number from the request
@@ -97,37 +103,39 @@ def add_customer(request):
     return render(request, 'add_customer.html', {'form': form})
 
     
-#Sauna
+# Sauna
 @login_required(login_url='/user/login/')
 def add_sauna(request):
     if request.method == 'POST':
         form = SaunaUserForm(request.POST)
         if form.is_valid():
             sauna_order = form.save(commit=False)
-            sauna_order.created_by = request.user 
+            sauna_order.created_by = request.user
             sauna_order.save()
-            
+
             return redirect('sauna_customers')
     else:
         form = SaunaUserForm()
 
     return render(request, 'add_sauna.html', {'form': form})
 
-#all sauna_customers
+# all sauna_customers
+
+
 @login_required(login_url='/user/login/')
 def sauna_customers(request):
     saunacustomers = SaunaUser.objects.all()
-    sauna_list = SaunaUser.objects.all().select_related('service', 'created_by').order_by('-order_date')
+    sauna_list = SaunaUser.objects.all().select_related(
+        'service', 'created_by').order_by('-order_date')
     paginator = Paginator(sauna_list, 10)
-    
+
     # Get the page number from the request
     page_number = request.GET.get('page')
-    
+
     # Get the corresponding page
     sauna_list = paginator.get_page(page_number)
 
     return render(request, "sauna_customers.html", {"sauna_list": sauna_list})
-
 
 
 # View for a single sauna customer's details
@@ -135,7 +143,7 @@ def sauna_customers(request):
 def get_sauna_customer(request, id):
     try:
         # Retrieve the sauna customer by their ID
-        
+
         customer = get_object_or_404(SaunaUser, id=id)
     except SaunaUser.DoesNotExist:
         # If the customer doesn't exist, redirect to the sauna customers list with an error message
@@ -143,6 +151,7 @@ def get_sauna_customer(request, id):
 
     # Render the customer's details in the template
     return render(request, 'eachsauna_customer.html', {'customer': customer})
+
 
 
 class RoomManagementView(View):
@@ -277,7 +286,7 @@ def create_booking(request):
     return redirect('room_booking')
 
 def booked_rooms(request):
-    bookings = Booking.objects.all().order_by('booking_date')
+    bookings = Booking.objects.all().order_by('-booking_date')
     paginator = Paginator(bookings, 10)
     
     page_number= request.GET.get('page')
@@ -297,31 +306,46 @@ def booking_detail(request, id):
 def convert_to_reservation(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id)
 
-    # Prevent double‐reservation
-    if hasattr(booking, 'reservation'):
-        # Already converted
-        return redirect('booking_detail', booking_id=booking.id)
+    if booking.status != 'reserved':
+        booking.status = 'reserved'
+        booking.save()
+        messages.success(
+            request, 'Booking converted to reservation successfully.')
+    else:
+        messages.info(request, 'Booking is already a reservation.')
 
-    # Create the reservation
-    RoomReservation.objects.create(
-        booking=booking,
-        check_in=timezone.make_aware(
-            timezone.datetime.combine(
-                booking.check_in, timezone.datetime.min.time())
-        ),
-        check_out=timezone.make_aware(
-            timezone.datetime.combine(
-                booking.check_out, timezone.datetime.min.time())
-        ),
-    )
+    return redirect('booked_rooms')
 
-    # Optionally flip booking.status
-    booking.status = 'reserved'
-    booking.save()
 
-    return redirect('reservation_detail', reservation_id=booking.reservation.id)
+# def confirm_booking(request, booking_id):
+#     booking = Booking.objects.get(id=booking_id)
+#     if booking.status != 'reserved':
+#         reservation = booking.convert_to_reservation(user=request.user)
+#         messages.success(
+#             request, f"Booking confirmed and reservation created for {reservation.customer}")
+#     else:
+#         messages.info(
+#             request, "This booking is already converted to a reservation.")
+#     return redirect('booking_detail')
+
+
+def confirm_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    if booking.status != 'reserved':
+        booking.status = 'reserved'
+        booking.save()  # 🔁 This triggers the signal
+        messages.success(
+            request, "Booking confirmed and converted to reservation.")
+    else:
+        messages.info(request, "Already reserved.")
+
+    return redirect('booking_detail', id=booking.id)
 
 
 def reservation_detail(request, reservation_id):
     reservation = get_object_or_404(RoomReservation, id=reservation_id)
     return render(request, 'reservation_detail.html', {'reservation': reservation})
+
+
+

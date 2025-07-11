@@ -4,13 +4,25 @@ from .models import (
     HotelBranch, Room, Customer, RoomReservation, SaunaUser, Sauna_services, Booking
 )
 
-admin.site.register(SaunaUser)
-admin.site.register(Sauna_services)
+
+@admin.register(Sauna_services)
+class Sauner_serviceAdmin(admin.ModelAdmin):
+    list_display = ['name', 'description', 'price',]
+    search_fields = ['name',]
+
+
+@admin.register(SaunaUser)
+class SaunaUserAdmin(admin.ModelAdmin):
+    list_display = ['customer_name', 'gender',
+                    'service', 'keys', 'price', 'order_date']
+    search_fields = ['customer_name', 'gender',  'service', 'order_date']
+
+
 
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ['booking_date', 'first_name', 'last_name', 'email', 'contact', 'room', 'check_in', 'check_out', 'guests', 'special_requests'
+    list_display = ['status','booking_date', 'first_name', 'last_name', 'email', 'contact', 'room', 'check_in', 'check_out', 'guests', 'special_requests'
 
                     ]
     search_fields = [
