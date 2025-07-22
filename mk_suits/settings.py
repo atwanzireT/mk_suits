@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-$_h+e-*%zteqo870ak_3wm*pft+u&q%^6i-ph$oy62!tm^==b%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+
 ALLOWED_HOSTS = ['*']
 
 
@@ -151,6 +152,7 @@ USE_TZ = True
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/user/login/'
+
 
 STATIC_URL = '/static/'
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files

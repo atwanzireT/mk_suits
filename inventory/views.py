@@ -352,7 +352,8 @@ def orderTransactions(request):
 
 @login_required
 def clearedTransactions(request):
-    orders_list = OrderTransaction.objects.filter(payment_mode__in=["CASH", "MOMO PAY", "AIRTEL PAY"]).order_by('-id')
+    orders_list = OrderTransaction.objects.filter(
+        payment_mode__in=["CASH", "MOMO PAY", "AIRTEL PAY", "INVOICE", "ON ACCOMMODATION"]).order_by('-id')
     page = request.GET.get('page')
     orders_page = Paginator(orders_list, 10).get_page(page)
     return render(request, "cleared_order_transactions.html", {"orders_list": orders_page})
