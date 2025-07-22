@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from otherPackages.models import OtherPackage
 from .forms import *
 from django.contrib.auth.decorators import login_required
-from datetime import date, datetime
+from datetime import date, datetime, time
 from calendar import monthrange
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -15,7 +15,7 @@ from room_bookings.models import Room, RoomReservation
 from inventory.models import *
 from datetime import date
 from django.utils.timezone import now
-from decimal import Decimal
+
 
 
 # Financial Documents
@@ -537,14 +537,23 @@ def calculate_unit_costing(start_date, end_date, include_room=True, include_orde
         **expense_filter, category__in=SHARED_EXPENSE_CATEGORIES).aggregate(total=Sum('amount'))['total'] or Decimal(0)
 
     # Revenue units
-    room_count = RoomReservation.objects.filter(reservation_date__range=(
-        start_date, end_date)).count() if include_room else 0
-    order_count = OrderTransaction.objects.filter(created__range=(
-        start_date, end_date)).count() if include_order else 0
-    other_count = OtherPackage.objects.filter(created_at__range=(
-        start_date, end_date)).count() if include_other else 0
 
-    total_units = room_count + order_count + other_count
+
+    start_datetime = datetime.combine(start_date, time.min)
+    end_datetime = datetime.combine(end_date, time.max)
+
+
+    room_count = RoomReservation.objects.filter(
+        reservation_date__range=(start_datetime, end_datetime)
+    ).count() if include_room else 0
+
+    order_count = OrderTransaction.objects.filter(
+        created__range=(start_datetime, end_datetime)
+    ).count() if include_order else 0
+
+    other_count = OtherPackage.objects.filter(
+        created_at__range=(start_datetime, end_datetime)
+    ).count() if include_other else 0
 
     # Avoid divide-by-zero
     room_share = Decimal(room_count) / \
