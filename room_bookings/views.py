@@ -285,14 +285,15 @@ def create_booking(request):
                     messages.error(request, f"{field}: {error}")
     return redirect('room_booking')
 
+
 def booked_rooms(request):
     bookings = Booking.objects.all().order_by('-booking_date')
     paginator = Paginator(bookings, 10)
-    
-    page_number= request.GET.get('page')
-    
-    bookings =  paginator.get_page(page_number)
-    return render(request, 'booked_rooms.html', {'bookings':bookings})
+
+    page_number = request.GET.get('page')
+
+    bookings = paginator.get_page(page_number)
+    return render(request, 'booked_rooms.html', {'bookings': bookings})
 
 
 def booking_detail(request, id):
@@ -300,7 +301,7 @@ def booking_detail(request, id):
 
     return render(request, 'booking_detail.html', {'booking': booking})
 
-#Convert booking to Reservations
+# Convert booking to Reservations
 
 
 def convert_to_reservation(request, booking_id):
@@ -315,18 +316,6 @@ def convert_to_reservation(request, booking_id):
         messages.info(request, 'Booking is already a reservation.')
 
     return redirect('booked_rooms')
-
-
-# def confirm_booking(request, booking_id):
-#     booking = Booking.objects.get(id=booking_id)
-#     if booking.status != 'reserved':
-#         reservation = booking.convert_to_reservation(user=request.user)
-#         messages.success(
-#             request, f"Booking confirmed and reservation created for {reservation.customer}")
-#     else:
-#         messages.info(
-#             request, "This booking is already converted to a reservation.")
-#     return redirect('booking_detail')
 
 
 def confirm_booking(request, booking_id):

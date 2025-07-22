@@ -8,12 +8,14 @@ from room_bookings.models import RoomReservation, Sauna_services
 from otherPackages.models import OtherPackage
 from .models import Budget, BudgetLine
 
+
 @receiver(post_save, sender=OrderTransaction)
 def create_revenue_from_order(sender, instance, created, **kwargs):
-    if instance.payment_mode != "NO PAYMENT":
+    if created and instance.payment_mode not in ["NO PAYMENT", "ON ACCOMMODATION", "INVOICES"]:
         # Prevent duplicates: only create if no existing revenue for this order
         if not Revenue.objects.filter(description__icontains=f"Order {instance.random_id}").exists():
-            total_amount = sum(item.total_price for item in instance.order_items.all())
+            total_amount = sum(
+                item.total_price for item in instance.order_items.all())
 
             Revenue.objects.create(
                 category='fnb',
@@ -23,7 +25,6 @@ def create_revenue_from_order(sender, instance, created, **kwargs):
                 date=timezone.now().date(),
                 created_by=instance.created_by,
             )
-
 
 @receiver(post_save, sender=RoomReservation)
 def add_revenue_on_check_in(sender, instance, created, **kwargs):
@@ -41,34 +42,20 @@ def add_revenue_on_check_in(sender, instance, created, **kwargs):
             )
 
 
-# @receiver(post_save, sender=Sauna_services)
-# def add_revenue_on_sauna_service(sender, instance, created, **kwargs):
-#     """Signal receiver to create Revenue entry when a Sauna_services is added."""
-#     if created:  # Only on first creation to avoid duplicates on updates
-#         Revenue.objects.create(
-#             category='other',
-#             description=f"Sauna Service: {instance.name}",
-#             amount=instance.price,
-#             received_from='customer',
-#             date=timezone.now().date()  # current date (use .now() or .now().date() as appropriate)
-#         )
-        
-        
 @receiver(post_save, sender=OtherPackage)
 def add_revenue_on_service_completion(sender, instance, created, **kwargs):
-    if instance:
-        # Avoid duplicate revenue entries
-        description = f"{instance.get_service_type_display()} - {instance.client_name} - {instance.id}"
-        if not Revenue.objects.filter(description=description).exists():
-            Revenue.objects.create(
-                category='other',
-                description=description,
-                amount=instance.total_amount,
-                received_from=instance.client_name,
-                date=timezone.now().date(),
-                created_by=instance.created_by,
-            )
-            
+    if created:
+        description = f"{instance.get_service_type_display()} - {instance.client_name} - {instance.id} - Initial Payment"
+        Revenue.objects.create(
+            category='other',
+            description=description,
+            amount=instance.amount_paid,
+            received_from=instance.client_name,
+            date=timezone.now().date(),
+            created_by=instance.created_by,
+        )
+
+
 @receiver(post_save, sender=Revenue)
 def update_budget_line_actual(sender, instance, created, **kwargs):
     if not created:
