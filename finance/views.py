@@ -333,8 +333,8 @@ def revenue(request):
     start_date_str = request.GET.get('start_date')
     end_date_str = request.GET.get('end_date')
     category = request.GET.get('category')
-
-    revenues = Revenue.objects.filter(is_active=True)
+    
+    revenues = Revenue.objects.filter(is_active=True).order_by('-date')
 
     # Safely parse start_date
     if start_date_str not in [None, '', 'None']:
@@ -357,7 +357,9 @@ def revenue(request):
 
     total_revenue = revenues.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    paginator = Paginator(revenues.order_by('-date'), 20)
+
+
+    paginator = Paginator(revenues.order_by('-date'), 25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
