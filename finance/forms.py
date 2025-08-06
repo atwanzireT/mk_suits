@@ -1,4 +1,5 @@
-from .models import Budget, BudgetLine
+from datetime import date, datetime
+from .models import Budget, BudgetLine, LiabilityPayment
 from django import forms
 from .models import Revenue, Expense, Asset, Liability
 
@@ -40,17 +41,61 @@ class AssetForm(forms.ModelForm):
             'attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
+
 class LiabilityForm(forms.ModelForm):
     class Meta:
         model = Liability
-        fields = ['description', 'amount', 'due_date', 'attachment']
+        fields = ['description', 'category', 'amount', 'date_received',
+                  'due_date', 'attachment', 'is_active']
         widgets = {
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
-            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Enter a brief description of the liability...'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Enter amount in UGX...'
+            }),
+            'date_received': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'due_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'attachment': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
         }
-        
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount is not None and amount <= 0:
+            raise forms.ValidationError("Amount must be greater than zero.")
+        return amount
+
+
+    def clean_due_date(self):
+        due_date = self.cleaned_data.get('due_date')
+        if due_date and due_date < date.today():  # <- FIXED with date.today()
+            raise forms.ValidationError("Due date cannot be in the past.")
+        return due_date
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if not instance.pk:
+            instance.remaining_balance = instance.amount  # Set initial balance on creation
+        if commit:
+            instance.save()
+        return instance
 
 MONTH_CHOICES = [
     (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
@@ -103,3 +148,26 @@ class BudgetLineForm(forms.ModelForm):
     class Meta:
         model = BudgetLine
         fields = ['budget', 'category', 'estimated_amount']
+
+
+class LiabilityPaymentForm(forms.ModelForm):
+    class Meta:
+        model = LiabilityPayment
+        fields = ['amount_paid', 'new_due_date', 'notes']
+        
+        widgets = {
+            'new_due_date': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'amount_paid': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Enter amount in UGX...'
+            }),
+            'notes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Enter a brief description of the liability...'
+            }),
+        }

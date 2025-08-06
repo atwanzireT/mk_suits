@@ -1,4 +1,4 @@
-from .models import Budget, BudgetLine
+from .models import Budget, BudgetLine, LiabilityPayment
 from django.contrib import admin
 from .models import Asset, Budget, Liability, Expense, Revenue, BudgetLine
 @admin.register(Asset)
@@ -7,11 +7,51 @@ class AssetAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_filter = ['is_active', 'purchase_date'] 
 
+
+class LiabilityPaymentInline(admin.TabularInline):
+    model = LiabilityPayment
+    extra = 0
+    readonly_fields = ['amount_paid', 'payment_date',
+                       'new_due_date', 'notes', 'created_by']
+    can_delete = False
+
+
 @admin.register(Liability)
 class LiabilityAdmin(admin.ModelAdmin):
-    list_display = ['description', 'amount', 'due_date', 'is_active'] 
-    search_fields = ['description']
-    list_filter = ['is_active', 'due_date'] 
+    list_display = ['description', 'amount', 
+                    'remaining_balance', 'due_date', 'is_paid', 'is_active']
+    search_fields = ['description', 'category']
+    list_filter = ['is_active', 'due_date', 'category']
+    readonly_fields = ['remaining_balance', 'is_paid', 'days_overdue']
+    inlines = [LiabilityPaymentInline]
+    fieldsets = (
+        ("Liability Information", {
+            'fields': ('description', 'category', 'amount', 'remaining_balance', 'due_date', 'attachment', 'is_active')
+        }),
+        ("Status & Tracking", {
+            'fields': ('is_paid', 'days_overdue', 'created_by', 'updated_by')
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.created_by = request.user
+        obj.updated_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(LiabilityPayment)
+class LiabilityPaymentAdmin(admin.ModelAdmin):
+    list_display = ['liability', 'amount_paid',
+                    'payment_date', 'new_due_date', 'created_by']
+    list_filter = ['payment_date']
+    search_fields = ['liability__description', 'notes']
+    readonly_fields = ['payment_date']
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):

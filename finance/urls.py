@@ -7,6 +7,10 @@ urlpatterns = [
     path('expense/add/', views.add_expense, name='add_expense'),
     path('asset/add/', views.add_asset, name='add_asset'),
     path('liability/add/', views.add_liability, name='add_liability'),
+    path('liability/<int:liability_id>/pay/',
+         views.pay_liability, name='pay_liability'),
+    path('liability/<int:liability_id>/',
+         views.liability_detail, name='liability_detail'),
     
     
     #lists

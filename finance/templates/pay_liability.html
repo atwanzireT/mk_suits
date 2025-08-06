@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3">
+          <h3 class="card-title mb-0">
+            <i class="fas fa-credit-card me-2"></i>
+            Pay Liability
+          </h3>
+        </div>
+        
+        <div class="card-body p-4">
+          <!-- Liability Information -->
+          <div class="alert alert-info border-0 mb-4">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h5 class="alert-heading mb-1">{{ liability.description }}</h5>
+                <small class="text-muted">Liability Details</small>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <div class="mt-2 mt-md-0">
+                  <small class="text-muted d-block">Remaining Balance</small>
+                  <h4 class="text-danger mb-0 fw-bold">
+                    Ugx {{ liability.remaining_balance|intcomma }}
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Form -->
+          <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row">
+              <div class="col-12">
+                <div class="form-section">
+                  <h6 class="text-muted mb-3">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Payment Information
+                  </h6>
+                  
+                  <!-- Form fields with enhanced styling -->
+                  <div class="form-fields">
+                    {{ form.as_p }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 pt-3 border-top">
+              <button type="submit" class="btn btn-success btn-lg px-4">
+                <i class="fas fa-paper-plane me-2"></i>
+                Submit Payment
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Custom styling for enhanced appearance */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
+  border-left: 4px solid #007bff;
+}
+
+.form-section h6 {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.form-fields p {
+  margin-bottom: 1.5rem;
+}
+
+.form-fields label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.form-fields input,
+.form-fields select,
+.form-fields textarea {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.form-fields input:focus,
+.form-fields select:focus,
+.form-fields textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .card-body {
+    padding: 2rem 1.5rem;
+  }
+  
+  .alert {
+    text-align: center;
+  }
+  
+  .alert .row > div {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Icon styling */
+.fas {
+  opacity: 0.8;
+}
+
+/* Enhanced visual hierarchy */
+.text-danger {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.border-top {
+  border-color: #e9ecef !important;
+}
+</style>
+{% endblock %}

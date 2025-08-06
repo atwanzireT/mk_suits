@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Liability Details</h2>
+    <hr>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>{{ liability.description }}</h5>
+            <p><strong>Category:</strong> {{ liability.get_category_display }}</p>
+            <p><strong>Original Amount:</strong> Ugx {{ liability.amount|intcomma }}</p>
+            <p><strong>Remaining Balance:</strong> Ugx {{ liability.remaining_balance|intcomma }}</p>
+            <p><strong>Due Date:</strong> {{ liability.due_date|date:"M d, Y" }}</p>
+            <p>
+                <strong>Status:</strong>
+                {% if liability.is_paid %}
+                    <span class="badge bg-success">Paid</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+            </p>
+            {% if liability.days_overdue > 0 %}
+                <p class="text-danger"><strong>Overdue by {{ liability.days_overdue }} days</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <h4>Payment History</h4>
+    {% if payments %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Amount Paid</th>
+                    <th>Payment Date</th>
+                    <th>New Due Date</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>Ugx {{ payment.amount_paid|intcomma }}</td>
+                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if payment.new_due_date %}
+                            {{ payment.new_due_date|date:"M d, Y" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    <td>{{ payment.notes|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No payments made yet.</p>
+    {% endif %}
+
+    <a href="{% url 'pay_liability' liability.id %}" class="btn btn-success mt-3">Make New Payment</a>
+    <a href="{% url 'liabilities' %}" class="btn btn-secondary mt-3">Back to List</a>
+</div>
+{% endblock %}

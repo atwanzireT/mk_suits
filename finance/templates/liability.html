@@ -1,38 +1,375 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
+{% block title %}Liabilities Management{% endblock %}
+
+{% block extra_css %}
+<style>
+  .liability-card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.375rem;
+  }
+  
+  .liability-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.375rem 0.375rem 0 0;
+  }
+  
+  .balance-high { color: #dc3545; font-weight: 600; }
+  .balance-medium { color: #fd7e14; font-weight: 600; }
+  .balance-low { color: #28a745; font-weight: 600; }
+  .balance-paid { color: #6c757d; font-weight: 600; }
+  
+  .due-overdue { color: #dc3545; font-weight: 600; }
+  .due-soon { color: #fd7e14; font-weight: 600; }
+  .due-normal { color: #28a745; }
+  
+  .status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+  }
+  
+  .status-paid { background-color: #d4edda; color: #155724; }
+  .status-partial { background-color: #fff3cd; color: #856404; }
+  .status-unpaid { background-color: #f8d7da; color: #721c24; }
+  
+  @media (max-width: 768px) {
+    .table-responsive {
+      font-size: 0.875rem;
+    }
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+  
+  .summary-cards .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card container mt-5">
-  <h2 class="m-2">Liabilities</h2>
+<div class="container-fluid mt-4">
+  <!-- Summary Cards -->
+  <div class="row mb-4 summary-cards">
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-primary">Total Liabilities</h5>
+          <h3 class="text-primary">{{ all_liability|length }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-danger">Total Amount</h5>
+          <h3 class="text-danger">UGX {{ total_amount|default:0|intcomma }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-success">Amount Paid</h5>
+          <h3 class="text-success">UGX {{ total_paid|default:0|intcomma }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title text-warning">Outstanding</h5>
+          <h3 class="text-warning">UGX {{ total_outstanding|default:0|intcomma }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <table class="table table-striped mt-4">
-    <thead>
-      <tr>
-        <th> Name</th>
-        <th>Amount</th>
-        
-        <th>Date Due </th>
-        <th>Actions</th>
+  <!-- Main Content Card -->
+  <div class="card liability-card">
+    <div class="card-header liability-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h2 class="mb-0">
+            <i class="fas fa-file-invoice-dollar me-2"></i>
+            Liabilities Management
+          </h2>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'add_liability' %}" class="btn btn-light btn-sm">
+            <i class="fas fa-plus me-1"></i>Add New Liability
+          </a>
+        </div>
+      </div>
+    </div>
 
-      </tr>
-    </thead>
-    <tbody>
-      {% for liability in all_liability %}
-      <tr>
-      
-        <td>{{ liability.description }}</td>
-     
-        <td>Ugx Shs. {{ liability.amount|intcomma }}</td>
-        <td>{{ liability.due_date }}</td>
-      
-        <td>
-        
-        </td>
-      </tr>
-     
-    
-      {% endfor %}
-    </tbody>
-  </table>
+    <div class="card-body p-0">
+      {% if all_liability %}
+        <!-- Filters and Search -->
+        <div class="p-3 border-bottom bg-light">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" id="searchInput" 
+                       placeholder="Search liabilities...">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="row">
+                <div class="col-md-6">
+                  <select class="form-select form-select-sm" id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="paid">Fully Paid</option>
+                    <option value="partial">Partially Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <select class="form-select form-select-sm" id="dueDateFilter">
+                    <option value="">All Due Dates</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="due-soon">Due Soon</option>
+                    <option value="normal">Normal</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" id="liabilitiesTable">
+            <thead class="table-light">
+              <tr>
+                <th class="sortable" data-column="date_received">
+                  Date Received <i class="fas fa-sort ms-1"></i>
+                </th>
+                <th class="sortable" data-column="description">
+                  Description <i class="fas fa-sort ms-1"></i>
+                </th>
+                <th class="sortable text-end" data-column="amount">
+                  Total Amount <i class="fas fa-sort ms-1"></i>
+                </th>
+                <th class="sortable text-end" data-column="amount_paid">
+                  Amount Paid <i class="fas fa-sort ms-1"></i>
+                </th>
+                <th class="sortable text-end" data-column="remaining_balance">
+                  Balance <i class="fas fa-sort ms-1"></i>
+                </th>
+                <th class="sortable" data-column="due_date">
+                  Due Date <i class="fas fa-sort ms-1"></i>
+                </th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for liability in all_liability %}
+              <tr data-liability-id="{{ liability.id }}">
+                <td>
+                  <small class="text-muted">{{ liability.date_received|date:"M d, Y" }}</small>
+                </td>
+                <td>
+                  <div class="fw-medium">{{ liability.description|truncatechars:30 }}</div>
+                  {% if liability.supplier %}
+                    <small class="text-muted">{{ liability.supplier }}</small>
+                  {% endif %}
+                </td>
+                <td class="text-end fw-medium">
+                  UGX {{ liability.amount|intcomma }}
+                </td>
+                <td class="text-end">
+                  UGX {{ liability.amount_paid|intcomma }}
+                </td>
+                <td class="text-end">
+                  {% if liability.remaining_balance <= 0 %}
+                    <span class="balance-paid">UGX {{ liability.remaining_balance|intcomma }}</span>
+                  {% elif liability.remaining_balance <= 50000 %}
+                    <span class="balance-low">UGX {{ liability.remaining_balance|intcomma }}</span>
+                  {% elif liability.remaining_balance <= 200000 %}
+                    <span class="balance-medium">UGX {{ liability.remaining_balance|intcomma }}</span>
+                  {% else %}
+                    <span class="balance-high">UGX {{ liability.remaining_balance|intcomma }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% now "Y-m-d" as today %}
+                  {% if liability.due_date|date:"Y-m-d" < today %}
+                    <span class="due-overdue">
+                      <i class="fas fa-exclamation-triangle me-1"></i>
+                      {{ liability.due_date|date:"M d, Y" }}
+                    </span>
+                  {% elif liability.due_date|timeuntil|slice:":2" <= "7 " %}
+                    <span class="due-soon">
+                      <i class="fas fa-clock me-1"></i>
+                      {{ liability.due_date|date:"M d, Y" }}
+                    </span>
+                  {% else %}
+                    <span class="due-normal">{{ liability.due_date|date:"M d, Y" }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  {% if liability.remaining_balance <= 0 %}
+                    <span class="badge status-paid">Paid</span>
+                  {% elif liability.amount_paid > 0 %}
+                    <span class="badge status-partial">Partial</span>
+                  {% else %}
+                    <span class="badge status-unpaid">Unpaid</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <a href="{% url 'liability_detail' liability.id %}" 
+                       class="btn btn-outline-info btn-sm" 
+                       title="View Details">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    {% if liability.remaining_balance > 0 %}
+                      <a href="{% url 'pay_liability' liability.id %}" 
+                         class="btn btn-outline-success btn-sm" 
+                         title="Make Payment">
+                        <i class="fas fa-credit-card"></i>
+                      </a>
+                    {% endif %}
+ 
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer">
+          <nav aria-label="Liabilities pagination">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+              {% endif %}
+              
+              <li class="page-item active">
+                <span class="page-link">
+                  Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+              </li>
+              
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+          <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+          <h4 class="text-muted">No Liabilities Found</h4>
+          <p class="text-muted">You haven't added any liabilities yet.</p>
+          <a href="{% url 'add_liability' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Add Your First Liability
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
+
+<!-- JavaScript for enhanced functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('liabilitiesTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    searchInput.addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        Array.from(rows).forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', function() {
+        const filterValue = this.value;
+        
+        Array.from(rows).forEach(row => {
+            if (!filterValue) {
+                row.style.display = '';
+                return;
+            }
+            
+            const statusBadge = row.querySelector('.badge');
+            const status = statusBadge.textContent.toLowerCase();
+            
+            let show = false;
+            if (filterValue === 'paid' && status === 'paid') show = true;
+            if (filterValue === 'partial' && status === 'partial') show = true;
+            if (filterValue === 'unpaid' && status === 'unpaid') show = true;
+            
+            row.style.display = show ? '' : 'none';
+        });
+    });
+
+    // Due date filter
+    const dueDateFilter = document.getElementById('dueDateFilter');
+    dueDateFilter.addEventListener('change', function() {
+        const filterValue = this.value;
+        
+        Array.from(rows).forEach(row => {
+            if (!filterValue) {
+                row.style.display = '';
+                return;
+            }
+            
+            const dueDateCell = row.cells[5];
+            const hasOverdue = dueDateCell.querySelector('.due-overdue');
+            const hasDueSoon = dueDateCell.querySelector('.due-soon');
+            
+            let show = false;
+            if (filterValue === 'overdue' && hasOverdue) show = true;
+            if (filterValue === 'due-soon' && hasDueSoon) show = true;
+            if (filterValue === 'normal' && !hasOverdue && !hasDueSoon) show = true;
+            
+            row.style.display = show ? '' : 'none';
+        });
+    });
+
+    // Table sorting
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            // Basic sorting implementation would go here
+            console.log('Sort by:', this.dataset.column);
+        });
+    });
+});
+</script>
 {% endblock %}
