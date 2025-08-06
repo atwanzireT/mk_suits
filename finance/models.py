@@ -97,31 +97,47 @@ class Liability(models.Model):
         LOAN = 'LOAN', "Loan / Debt"
         PAYABLE = 'PAYABLE', "Accounts Payable"
         OTHER = 'OTHER', "Other"
-    description = models.CharField(max_length=255, verbose_name="Liability Description")
+
+    description = models.CharField(
+        max_length=255, verbose_name="Liability Description")
     category = models.CharField(max_length=50, choices=LiabilityCategory.choices,
                                 default=LiabilityCategory.OTHER, verbose_name="Liability Category")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    date_received = models.DateField(null=True, blank=True)
+    remaining_balance = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0.00)
     due_date = models.DateField(blank=True, null=True)
-    attachment = models.FileField(upload_to="attachments/liability/", blank=True, null=True,
-                                  help_text="Supporting document (optional).")
+    attachment = models.FileField(
+        upload_to="attachments/liability/", blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
                                    on_delete=models.SET_NULL, related_name="liabilities_created", editable=False)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
                                    on_delete=models.SET_NULL, related_name="liabilities_updated", editable=False)
     is_active = models.BooleanField(default=True, verbose_name="Active")
 
+    def save(self, *args, **kwargs):
+        if not self.remaining_balance:
+            self.remaining_balance = self.amount
+        super().save(*args, **kwargs)
+
+    @property
+    def is_paid(self):
+        return self.remaining_balance <= 0
+
     @property
     def days_overdue(self):
-        """Calculate days overdue if not paid by due_date."""
-        from datetime import date
-        if self.is_active and self.due_date:
+        if self.is_active and self.due_date and not self.is_paid:
             today = date.today()
             if today > self.due_date:
                 return (today - self.due_date).days
         return 0
 
+    @property
+    def amount_paid(self):
+        return self.payments.aggregate(total=Sum('amount_paid'))['total'] or 0
     def __str__(self):
-        return f"{self.description} - {self.amount}"
+        return f"{self.description} - UGX {self.amount}"
 
     class Meta:
         verbose_name = "Liability"
@@ -129,6 +145,23 @@ class Liability(models.Model):
         ordering = ["-due_date", "-id"]
 
 
+class LiabilityPayment(models.Model):
+    liability = models.ForeignKey(
+        Liability, on_delete=models.CASCADE, related_name='payments')
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_date = models.DateField(auto_now_add=True)
+    new_due_date = models.DateField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                   on_delete=models.SET_NULL, related_name='liability_payments')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update liability balance and optionally due date
+        self.liability.remaining_balance -= self.amount_paid
+        if self.new_due_date:
+            self.liability.due_date = self.new_due_date
+        self.liability.save()
 class Budget(models.Model):
     MONTH_CHOICES = [(i, i) for i in range(1, 13)]
 

@@ -318,14 +318,69 @@ def all_assets(request):
     return render(request, "assets.html", {"assets_list": page_obj})
 
 
+@login_required
+def liability_detail(request, liability_id):
+    liability = get_object_or_404(Liability, id=liability_id)
+    payments = liability.payments.all().order_by('-payment_date')
+
+    return render(request, 'liability_detail.html', {
+        'liability': liability,
+        'payments': payments
+    })
+
+
 @login_required(login_url='/user/login/')
 def liabities(request):
+    all_liabilities = Liability.objects.prefetch_related('payments').all()
+
+    total_amount = all_liabilities.aggregate(total=Sum('amount'))['total'] or 0
+
+    total_paid = 0
+    for liability in all_liabilities:
+        paid = liability.payments.aggregate(
+            paid=Sum('amount_paid'))['paid'] or 0
+        total_paid += paid
+
+    total_outstanding = total_amount - total_paid
+
+    # Prepare main context
+    context = {
+        'total_amount': total_amount,
+        'total_paid': total_paid,
+        'total_outstanding': total_outstanding,
+    }
+
+    # Paginate active liabilities
     all_liability = Liability.objects.filter(
         is_active=True).order_by('-due_date')
     paginator = Paginator(all_liability, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, "liability.html", {"all_liability": page_obj})
+
+    # Add paginated results to context
+    context['all_liability'] = page_obj
+
+    return render(request, "liability.html", context)
+
+
+@login_required
+def pay_liability(request, liability_id):
+    liability = get_object_or_404(Liability, id=liability_id)
+    form = LiabilityPaymentForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        payment = form.save(commit=False)
+        payment.liability = liability
+        payment.created_by = request.user
+        payment.save()
+        return redirect('liability_detail', liability_id=liability.id)
+
+    return render(request, 'pay_liability.html', {
+        'liability': liability,
+        'form': form,
+    })
+    
+
 
 
 @login_required(login_url='/user/login/')

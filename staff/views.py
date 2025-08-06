@@ -5,6 +5,7 @@ from .forms import StaffForm, StaffAttendanceForm, StaffCheckoutForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.core.paginator import Paginator
 
 # Staff List
 @login_required
@@ -22,10 +23,51 @@ def add_staff(request):
     return render(request, 'add_staff.html', {'form': form})
 
 # Attendance List
+
+
 @login_required
 def attendance_list(request):
-    attendance = StaffAttendance.objects.select_related('staff').all()
-    return render(request, 'attendance_list.html', {'attendance': attendance})
+    today = now().date()
+
+    # Get up to 10 records from today
+    todays_attendance = StaffAttendance.objects.select_related('staff') \
+        .filter(date=today) \
+        .order_by('-time_in')[:10]
+
+    # Get remaining records (older than today OR overflow from today)
+    excluded_ids = todays_attendance.values_list('id', flat=True)
+    other_attendance = StaffAttendance.objects.select_related('staff') \
+        .exclude(id__in=excluded_ids) \
+        .order_by('-date', '-time_in')
+
+    # Paginate other records (starting from page 2)
+    paginator = Paginator(other_attendance, 10)
+    page_number = request.GET.get('page', '1')
+
+    if page_number == '1':
+        # Combine today's attendance with remaining (if < 10, fill from others)
+        remaining_slots = 10 - len(todays_attendance)
+        if remaining_slots > 0:
+            extra_records = other_attendance[:remaining_slots]
+            records_to_display = list(todays_attendance) + list(extra_records)
+        else:
+            records_to_display = todays_attendance
+        is_first_page = True
+    else:
+        # Use paginator for other pages
+        page_obj = paginator.get_page(page_number)
+        records_to_display = page_obj
+        is_first_page = False
+
+    context = {
+        'records': records_to_display,
+        'is_first_page': is_first_page,
+    }
+
+    if not is_first_page:
+        context['page_obj'] = page_obj
+
+    return render(request, 'attendance_list.html', context)
 
 # Mark Attendance
 @login_required
