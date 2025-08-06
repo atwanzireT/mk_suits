@@ -428,23 +428,35 @@ def revenue(request):
     }
     return render(request, 'revenue.html', context)
 
+
 @login_required(login_url='/user/login/')
 def expense(request):
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
     category = request.GET.get('category')
 
     expense_list = Expense.objects.filter(is_active=True).order_by('-date')
 
+    # Parse and validate dates
+    start_date = None
+    end_date = None
 
-    if start_date:
-        expense_list = expense_list.filter(date__gte=start_date)
-    if end_date:
-        expense_list = expense_list.filter(date__lte=end_date)
+    if start_date_str and start_date_str.lower() != 'none':
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            expense_list = expense_list.filter(date__gte=start_date)
+        except ValueError:
+            pass  # Invalid date input, ignore
+
+    if end_date_str and end_date_str.lower() != 'none':
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            expense_list = expense_list.filter(date__lte=end_date)
+        except ValueError:
+            pass
+
     if category:
         expense_list = expense_list.filter(category=category)
-
-
 
     total_expense = expense_list.aggregate(total=Sum('amount'))['total'] or 0
 
@@ -454,12 +466,11 @@ def expense(request):
 
     context = {
         "expense_list": expense_page,
-        'selected_category': category,
+        "selected_category": category,
         "total_expense": total_expense,
-        "start_date": start_date,
-        "end_date": end_date,
-        'expense_choices': Expense.EXPENCE_CHOICES,
-        
+        "start_date": start_date_str,
+        "end_date": end_date_str,
+        "expense_choices": Expense.EXPENCE_CHOICES,
     }
     return render(request, "expense.html", context)
 
