@@ -81,6 +81,7 @@ class Customer(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+
 class RoomReservation(models.Model):
     RESERVATION_STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -90,13 +91,13 @@ class RoomReservation(models.Model):
         ('Checked-Out', 'Checked-Out'),
     ]
 
-    reservation_id = models.BigIntegerField(unique=True, editable=False, default=0)
-
-  
+    reservation_id = models.BigIntegerField(
+        unique=True, editable=False, default=0)
     booking = models.OneToOneField(
-    'Booking', on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation')
-
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reservations')
+        'Booking', on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation'
+    )
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, related_name='reservations')
     customer = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
@@ -104,10 +105,13 @@ class RoomReservation(models.Model):
     check_in_date = models.DateField()
     check_out_date = models.DateField()
     reservation_date = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=20, choices=RESERVATION_STATUS_CHOICES, default='Pending')
+    status = models.CharField(
+        max_length=20, choices=RESERVATION_STATUS_CHOICES, default='Pending')
     special_requests = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.00)
+    created_by = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    total_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, default=0.00)
 
     def __str__(self):
         return f"Reservation for {self.customer} - Room {self.room.room_number}"
@@ -126,26 +130,31 @@ class RoomReservation(models.Model):
         return 0
 
     def clean(self):
-        # Ensure check-in date is not in the past
-        if self.check_in_date < timezone.now().date():
+        today = timezone.now().date()
+
+        # ✅ Allow marking as Checked-Out even if the checkout date has already passed
+        if self.status == "Checked-Out":
+            return
+
+        # Ensure check-in date is not in the past (only for active reservations)
+        if self.check_in_date < today:
             raise ValidationError("Check-in date cannot be in the past.")
 
         # Ensure checkout date is after check-in date
         if self.check_out_date <= self.check_in_date:
-            raise ValidationError("Checkout date must be after the check-in date.")
-            
-        # Check if the room is available for the selected dates
-        # Skip this check if the reservation is being cancelled or checked-out
+            raise ValidationError(
+                "Checkout date must be after the check-in date.")
+
+        # Check if the room is available for the selected dates (skip if cancelled/checked-out)
         if self.status not in ['Cancelled', 'Checked-Out']:
-            # When updating a reservation, pass the current reservation to exclude it from the check
             is_available = self.room.check_availability(
-                self.check_in_date, 
+                self.check_in_date,
                 self.check_out_date,
                 exclude_reservation=self if self.pk else None
             )
-            
             if not is_available:
-                raise ValidationError(f"Room {self.room.room_number} is not available for the selected dates.")
+                raise ValidationError(
+                    f"Room {self.room.room_number} is not available for the selected dates.")
 
     def save(self, *args, **kwargs):
         # Assign a unique 9-digit reservation ID if not set
@@ -163,13 +172,14 @@ class RoomReservation(models.Model):
 
         # Run validation before saving
         self.clean()
-        
+
         # Save the reservation
         super().save(*args, **kwargs)
-        
+
         # If status has changed or this is a new reservation, update room availability
         if old_status != self.status or old_status is None:
             self.room.update_availability_status()
+
 # SAUNA
 
 
