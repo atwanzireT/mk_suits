@@ -46,7 +46,7 @@ class RoomReservationForm(forms.ModelForm):
         regex=r'^\+?1?\d{9,15}$',
         message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
     )
-    
+
     phone_number = forms.CharField(
         validators=[phone_regex],
         widget=forms.TextInput(attrs={
@@ -55,7 +55,7 @@ class RoomReservationForm(forms.ModelForm):
             'pattern': '^\+?[0-9]{9,15}$'
         })
     )
-    
+
     NIN = forms.CharField(
         label="National ID Number",
         widget=forms.TextInput(attrs={
@@ -67,13 +67,13 @@ class RoomReservationForm(forms.ModelForm):
     class Meta:
         model = RoomReservation
         fields = [
-            'room', 
+            'room',
             'customer',
             'email',
             'phone_number',
             'NIN',
-            'check_in_date', 
-            'check_out_date', 
+            'check_in_date',
+            'check_out_date',
             'special_requests'
         ]
         widgets = {
@@ -89,14 +89,14 @@ class RoomReservationForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'john@example.com'
             }),
+            # ✅ Removed 'min' attribute so users can pick past dates
             'check_in_date': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control',
-                'min': timezone.now().date().isoformat()
             }),
             'check_out_date': forms.DateInput(attrs={
                 'type': 'date',
-                'class': 'form-control'
+                'class': 'form-control',
             }),
             'special_requests': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -118,10 +118,10 @@ class RoomReservationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Initially restrict to rooms that are marked as available
+        # Initially restrict to available rooms
         self.fields['room'].queryset = Room.objects.filter(is_available=True)
 
-        # Optionally, dynamically filter further once check-in/out are entered (for AJAX or custom views)
+        # Dynamically filter available rooms based on selected dates
         if 'check_in_date' in self.data and 'check_out_date' in self.data:
             try:
                 check_in = self.data.get('check_in_date')
@@ -133,7 +133,7 @@ class RoomReservationForm(forms.ModelForm):
                             available_rooms.append(room.id)
                     self.fields['room'].queryset = Room.objects.filter(id__in=available_rooms)
             except Exception:
-                pass  # fallback to initial is_available=True
+                pass  # fallback
 
     def clean(self):
         cleaned_data = super().clean()
@@ -141,12 +141,10 @@ class RoomReservationForm(forms.ModelForm):
         check_out = cleaned_data.get('check_out_date')
 
         if check_in and check_out:
-            if check_in < timezone.now().date():
-                raise forms.ValidationError("Check-in date cannot be in the past")
+            # ✅ Allow past check-in dates
             if check_out <= check_in:
-                raise forms.ValidationError("Check-out date must be after check-in date")
+                raise forms.ValidationError("Check-out date must be after check-in date.")
         return cleaned_data
-
 
 class RoomTypeForm(forms.ModelForm):
     class Meta:
