@@ -127,6 +127,77 @@
         background-color: rgba(67, 97, 238, 0.03);
     }
 
+    /* Mobile Card View */
+    .mobile-card-view {
+        display: none;
+    }
+
+    .reservation-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .reservation-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .reservation-card-room {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #212529;
+        margin-bottom: 0.25rem;
+    }
+
+    .reservation-card-customer {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .reservation-card-body {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .reservation-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .reservation-info-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .reservation-info-value {
+        color: #212529;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .reservation-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .reservation-card-actions .btn {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+
     /* Status badge styling */
     .badge {
         padding: 0.5rem 0.85rem;
@@ -238,34 +309,6 @@
         margin-bottom: 1.5rem;
     }
 
-    /* Customer info styling */
-    .customer-info {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .customer-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: #e9ecef;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    .filters-wrapper {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-
     /* Responsive adjustments */
     @media (max-width: 992px) {
         .header-actions {
@@ -279,6 +322,81 @@
 
         .search-control {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        /* Hide table on mobile */
+        .table-container,
+        .desktop-table-view {
+            display: none !important;
+        }
+
+        /* Show mobile card view */
+        .mobile-card-view {
+            display: block;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-header {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+        }
+
+        .filters-wrapper {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .filters-wrapper > * {
+            width: 100% !important;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .search-control {
+            width: 100%;
+            min-width: unset;
+        }
+
+        /* Pagination mobile adjustments */
+        .pagination {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .page-link {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        /* Modal adjustments */
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .reservation-card-actions {
+            flex-direction: column;
+        }
+
+        .reservation-card-actions .btn {
+            width: 100%;
+        }
+
+        .page-item.disabled,
+        .page-item:not(.active):not(:first-child):not(:last-child) {
+            display: none;
         }
     }
 </style>
@@ -314,102 +432,166 @@
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
-
         </div>
-        <div class="table-container"></div>
-        <table class="table table-striped" style="font-size: 0.85rem;">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Room</th>
-                    <th>Customer</th>
-                    <th>Check-in Date</th>
-                    <th>Total Nights</th>
-                    <th>Status</th>
-                    <th>Reservation Date</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for reservation in reservations_list %}
-                <tr class="reservation-row" data-status="{{ reservation.status }}">
-                    <td>{{ forloop.counter }}</td>
-                    <td><span class="fw-medium">Room {{ reservation.room.room_number }}</span></td>
-                    <td>{{ reservation.customer }}</td>
-                    <td>{{ reservation.check_in_date }}</td>
-                    <td>{{ reservation.total_nights }}</td>
-                    <td>
+
+        <!-- Desktop Table View -->
+        <div class="desktop-table-view">
+            <div class="table-container">
+                <table class="table table-striped" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Room</th>
+                            <th>Customer</th>
+                            <th>Check-in Date</th>
+                            <th>Total Nights</th>
+                            <th>Status</th>
+                            <th>Reservation Date</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations_list %}
+                        <tr class="reservation-row" data-status="{{ reservation.status }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td><span class="fw-medium">Room {{ reservation.room.room_number }}</span></td>
+                            <td>{{ reservation.customer }}</td>
+                            <td>{{ reservation.check_in_date }}</td>
+                            <td>{{ reservation.total_nights }}</td>
+                            <td>
+                                {% if reservation.status == 'Confirmed' %}
+                                <span class="badge badge-confirmed"><i class="fas fa-check-circle"></i> 
+                                    {{ reservation.status}}</span>
+                                {% elif reservation.status == 'Pending' %}
+                                <span class="badge badge-pending"><i class="fas fa-clock"></i> {{ reservation.status }}</span>
+                                {% elif reservation.status == 'Cancelled' %}
+                                <span class="badge badge-cancelled"><i class="fas fa-times-circle"></i> 
+                                    {{ reservation.status}}</span>
+                                {% elif reservation.status == 'Checked-In' %}
+                                <span class="badge badge-checked-in"><i class="fas fa-door-open"></i> 
+                                    {{ reservation.status }}</span>
+                                {% elif reservation.status == 'Checked-Out' %}
+                                <span class="badge badge-checked-out"><i class="fas fa-door-closed"></i> 
+                                    {{ reservation.status }}</span>
+                                {% else %}
+                                <span class="badge badge-secondary"><i class="fas fa-question-circle"></i> 
+                                    {{ reservation.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ reservation.reservation_date }}</td>
+                            <td class="text-center">
+                                <a href="/room_bookings/reservations/{{ reservation.id }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                                    data-bs-target="#statusModal" data-id="{{ reservation.id }}"
+                                    data-status="{{ reservation.status }}">
+                                    <i class="fas fa-edit"></i> Update Status
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-alt empty-state-icon"></i>
+                                    <h5 class="empty-state-message">No Reservations Found</h5>
+                                    <p class="empty-state-description">There are currently no reservations in the system.</p>
+                                    <a href="/room_bookings/add-reservation/" class="btn btn-primary">
+                                        <i class="fas fa-plus-circle"></i> Make First Reservation
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Card View -->
+        <div class="mobile-card-view">
+            {% for reservation in reservations_list %}
+            <div class="reservation-card" data-status="{{ reservation.status }}">
+                <div class="reservation-card-header">
+                    <div>
+                        <div class="reservation-card-room">Room {{ reservation.room.room_number }}</div>
+                        <div class="reservation-card-customer">{{ reservation.customer }}</div>
+                    </div>
+                    <div>
                         {% if reservation.status == 'Confirmed' %}
-                        <span class="badge badge-confirmed"><i class="fas fa-check-circle"></i> 
-                            {{ reservation.status}}</span>
+                        <span class="badge badge-confirmed"><i class="fas fa-check-circle"></i> {{ reservation.status}}</span>
                         {% elif reservation.status == 'Pending' %}
                         <span class="badge badge-pending"><i class="fas fa-clock"></i> {{ reservation.status }}</span>
                         {% elif reservation.status == 'Cancelled' %}
-                        <span class="badge badge-cancelled"><i class="fas fa-times-circle"></i> 
-                            {{ reservation.status}}</span>
+                        <span class="badge badge-cancelled"><i class="fas fa-times-circle"></i> {{ reservation.status}}</span>
                         {% elif reservation.status == 'Checked-In' %}
-                        <span class="badge badge-checked-in"><i class="fas fa-door-open"></i> 
-                            {{ reservation.status }}</span>
+                        <span class="badge badge-checked-in"><i class="fas fa-door-open"></i> {{ reservation.status }}</span>
                         {% elif reservation.status == 'Checked-Out' %}
-                        <span class="badge badge-checked-out"><i class="fas fa-door-closed"></i> 
-                            {{ reservation.status }}</span>
+                        <span class="badge badge-checked-out"><i class="fas fa-door-closed"></i> {{ reservation.status }}</span>
                         {% else %}
-                        <span class="badge badge-secondary"><i class="fas fa-question-circle"></i> 
-                            {{ reservation.status }}</span>
+                        <span class="badge badge-secondary"><i class="fas fa-question-circle"></i> {{ reservation.status }}</span>
                         {% endif %}
-                    </td>
-                    <td>{{ reservation.reservation_date }}</td>
-                    <td class="text-center">
-                        <a href="/room_bookings/reservations/{{ reservation.id }}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                            data-bs-target="#statusModal" data-id="{{ reservation.id }}"
-                            data-status="{{ reservation.status }}">
-                            <i class="fas fa-edit"></i> Update Status
-                        </button>
+                    </div>
+                </div>
+                
+                <div class="reservation-card-body">
+                    <div class="reservation-info-row">
+                        <span class="reservation-info-label">Check-in Date</span>
+                        <span class="reservation-info-value">{{ reservation.check_in_date }}</span>
+                    </div>
+                    <div class="reservation-info-row">
+                        <span class="reservation-info-label">Total Nights</span>
+                        <span class="reservation-info-value">{{ reservation.total_nights }}</span>
+                    </div>
+                    <div class="reservation-info-row">
+                        <span class="reservation-info-label">Reservation Date</span>
+                        <span class="reservation-info-value">{{ reservation.reservation_date }}</span>
+                    </div>
+                </div>
 
-                    </td>
-                </tr>
-
-                {% empty %}
-                <tr>
-                    <td colspan="8">
-                        <div class="empty-state">
-                            <i class="fas fa-calendar-alt empty-state-icon"></i>
-                            <h5 class="empty-state-message">No Reservations Found</h5>
-                            <p class="empty-state-description">There are currently no reservations in the system.
-                            </p>
-                            <a href="/room_bookings/add-reservation/" class="btn btn-primary">
-                                <i class="fas fa-plus-circle"></i> Make First Reservation
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            {% if reservations_list.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1" aria-label="First">
-                    <i class="fas fa-angle-double-left"></i>
+                <div class="reservation-card-actions">
+                    <a href="/room_bookings/reservations/{{ reservation.id }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                        data-bs-target="#statusModal" data-id="{{ reservation.id }}"
+                        data-status="{{ reservation.status }}">
+                        <i class="fas fa-edit"></i> Update
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-alt empty-state-icon"></i>
+                <h5 class="empty-state-message">No Reservations Found</h5>
+                <p class="empty-state-description">There are currently no reservations in the system.</p>
+                <a href="/room_bookings/add-reservation/" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Make First Reservation
                 </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ reservations_list.previous_page_number }}" aria-label="Previous">
-                    <i class="fas fa-angle-left"></i>
-                </a>
-            </li>
-            {% endif %}
+            </div>
+            {% endfor %}
+        </div>
 
-            {% for page_num in reservations_list.paginator.page_range %}
-            {% if page_num >= reservations_list.number|add:-2 and page_num <= reservations_list.number|add:2 %} <li
-                class="page-item {% if page_num == reservations_list.number %}active{% endif %}">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if reservations_list.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ reservations_list.previous_page_number }}" aria-label="Previous">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for page_num in reservations_list.paginator.page_range %}
+                {% if page_num >= reservations_list.number|add:-2 and page_num <= reservations_list.number|add:2 %}
+                <li class="page-item {% if page_num == reservations_list.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
                 </li>
                 {% elif page_num == 1 or page_num == reservations_list.paginator.num_pages %}
                 <li class="page-item">
@@ -432,10 +614,11 @@
                     </a>
                 </li>
                 {% endif %}
-        </ul>
-    </nav>
+            </ul>
+        </nav>
+    </div>
 </div>
-</div>
+
 <!-- Modal -->
 <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -510,48 +693,52 @@
                     alert("An error occurred.");
                 });
         });
-    });
-</script>
 
-<!-- Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<!-- Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Search functionality
+        // Search functionality - works for both table and card views
         const searchInput = document.getElementById('reservationSearch');
         if (searchInput) {
             searchInput.addEventListener('keyup', function () {
                 const searchText = this.value.toLowerCase();
-                const rows = document.querySelectorAll('.reservation-row');
-
-                rows.forEach(row => {
+                
+                // Search in table rows
+                const tableRows = document.querySelectorAll('.reservation-row');
+                tableRows.forEach(row => {
                     const rowText = row.textContent.toLowerCase();
-                    if (rowText.includes(searchText)) {
+                    row.style.display = rowText.includes(searchText) ? '' : 'none';
+                });
+
+                // Search in mobile cards
+                const mobileCards = document.querySelectorAll('.reservation-card');
+                mobileCards.forEach(card => {
+                    const cardText = card.textContent.toLowerCase();
+                    card.style.display = cardText.includes(searchText) ? '' : 'none';
+                });
+            });
+        }
+
+        // Status filter functionality - works for both views
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function () {
+                const selectedStatus = this.value;
+                
+                // Filter table rows
+                const tableRows = document.querySelectorAll('.reservation-row');
+                tableRows.forEach(row => {
+                    if (!selectedStatus || row.dataset.status === selectedStatus) {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
                     }
                 });
-            });
-        }
 
-        // Status filter functionality
-        const statusFilter = document.getElementById('statusFilter');
-        if (statusFilter) {
-            statusFilter.addEventListener('change', function () {
-                const selectedStatus = this.value;
-                const rows = document.querySelectorAll('.reservation-row');
-
-                rows.forEach(row => {
-                    if (!selectedStatus || row.dataset.status === selectedStatus) {
-                        row.style.display = '';
+                // Filter mobile cards
+                const mobileCards = document.querySelectorAll('.reservation-card');
+                mobileCards.forEach(card => {
+                    if (!selectedStatus || card.dataset.status === selectedStatus) {
+                        card.style.display = '';
                     } else {
-                        row.style.display = 'none';
+                        card.style.display = 'none';
                     }
                 });
             });
@@ -566,4 +753,12 @@
         }
     });
 </script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 {% endblock content %}
