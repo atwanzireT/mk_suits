@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Log Maintenance Activity</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="id_room_asset" class="form-label">Asset *</label>
+                                {{ form.room_asset }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_maintenance_type" class="form-label">Maintenance Type *</label>
+                                {{ form.maintenance_type }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_description" class="form-label">Description *</label>
+                                {{ form.description }}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_technician" class="form-label">Technician *</label>
+                                        {{ form.technician }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_cost" class="form-label">Cost</label>
+                                        {{ form.cost }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_next_maintenance_date" class="form-label">Next Maintenance Date</label>
+                                {{ form.next_maintenance_date }}
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'assets:maintenance_list' %}" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Log Maintenance</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

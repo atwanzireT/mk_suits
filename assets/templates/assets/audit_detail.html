@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Audit - Room {{ audit.room.room_number }}</h1>
+            <div>
+                <a href="{% url 'assets:monthly_audits' %}" class="btn btn-secondary">Back to Audits</a>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Audit Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Room:</strong> {{ audit.room.room_number }}</p>
+                        <p><strong>Room Type:</strong> {{ audit.room.room_type }}</p>
+                        <p><strong>Audit Date:</strong> {{ audit.audit_date|date:"M d, Y" }}</p>
+                        <p><strong>Auditor:</strong> {{ audit.auditor.get_full_name|default:audit.auditor.username }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="badge {% if audit.completed %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if audit.completed %}Completed{% else %}Pending{% endif %}
+                            </span>
+                        </p>
+                        {% if audit.notes %}
+                        <p><strong>Notes:</strong> {{ audit.notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Room Assets</h5>
+                        <span class="badge bg-primary">{{ audit_items.count }} assets</span>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Asset Name</th>
+                                            <th>Current Status</th>
+                                            <th>Condition Notes</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in audit_items %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ item.room_asset.asset.name }}</strong>
+                                                <br>
+                                                <small class="text-muted">Qty: {{ item.room_asset.quantity }}</small>
+                                            </td>
+                                            <td>
+                                                <select name="status_{{ item.id }}" class="form-select form-select-sm">
+                                                    <option value="working" {% if item.status == 'working' %}selected{% endif %}>Working</option>
+                                                    <option value="maintenance" {% if item.status == 'maintenance' %}selected{% endif %}>Needs Maintenance</option>
+                                                    <option value="broken" {% if item.status == 'broken' %}selected{% endif %}>Broken</option>
+                                                    <option value="replaced" {% if item.status == 'replaced' %}selected{% endif %}>Replaced</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <textarea name="notes_{{ item.id }}" class="form-control form-control-sm" rows="2" placeholder="Add condition notes...">{{ item.condition_notes }}</textarea>
+                                            </td>
+                                            <td>
+                                                {% if item.photo %}
+                                                <a href="{{ item.photo.url }}" target="_blank" class="btn btn-sm btn-info">View Photo</a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">No assets found for this room.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {% if audit_items %}
+                            <div class="mt-3">
+                                <div class="form-group mb-3">
+                                    <label for="audit_notes" class="form-label">Audit Notes (Optional)</label>
+                                    <textarea name="audit_notes" id="audit_notes" class="form-control" rows="3" placeholder="Add general notes about this audit...">{{ audit.notes }}</textarea>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" name="save_progress" class="btn btn-primary">Save Progress</button>
+                                    
+                                    {% if not audit.completed %}
+                                    <button type="submit" name="complete_audit" class="btn btn-success">Complete Audit</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if audit.completed %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Audit Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-success">
+                                {{ audit_items|dictsort:"status"|length }}
+                            </h3>
+                            <p class="text-muted">Working Assets</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-warning">
+                                {{ audit_items|dictsort:"status"|length }}
+                            </h3>
+                            <p class="text-muted">Needs Maintenance</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-danger">
+                                {{ audit_items|dictsort:"status"|length }}
+                            </h3>
+                            <p class="text-muted">Broken Assets</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="text-info">
+                                {{ audit_items|dictsort:"status"|length }}
+                            </h3>
+                            <p class="text-muted">Replaced Assets</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+
+
+{% endblock %}

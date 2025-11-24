@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h4 class="mb-0 text-white">Create Monthly Audits</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h5>About Monthly Audits</h5>
+                            <p class="mb-0">
+                                This will create audit records for all rooms that don't have an audit for the current month. 
+                                Each audit will include all assets currently assigned to the room.
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>What will be created:</h5>
+                            <ul>
+                                <li>New audit records for rooms without current month audits</li>
+                                <li>Audit items for each asset in the room</li>
+                                <li>Default status set to current asset status</li>
+                                <li>Auditor set to you ({{ request.user.get_full_name|default:request.user.username }})</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Current Month: {{ current_month }}</h5>
+                            <p class="text-muted">Audits will be created for: <strong>{{ current_month }}</strong></p>
+                        </div>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">Create Monthly Audits</button>
+                                <a href="{% url 'assets:monthly_audits' %}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  {% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            {% if room %}
+                                Add Asset to Room {{ room.room_number }}
+                            {% else %}
+                                Add Asset to Room
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            {% if not room %}
+                            <div class="mb-3">
+                                <label for="id_room" class="form-label">Room *</label>
+                                {{ form.room }}
+                                {% if form.room.errors %}
+                                <div class="text-danger">
+                                    {{ form.room.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="asset_name" class="form-label">Asset Name *</label>
+                                <input type="text" name="asset_name" id="asset_name" class="form-control" 
+                                       value="{{ request.POST.asset_name }}" required 
+                                       placeholder="e.g., Television, Bed, Chair">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="category_name" class="form-label">Category (Optional)</label>
+                                <input type="text" name="category_name" id="category_name" class="form-control" 
+                                       value="{{ request.POST.category_name }}"
+                                       placeholder="e.g., Electronics, Furniture">
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_quantity" class="form-label">Quantity</label>
+                                        {{ form.quantity }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_status" class="form-label">Status</label>
+                                        {{ form.status }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_installation_date" class="form-label">Installation Date</label>
+                                {{ form.installation_date }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_notes" class="form-label">Notes</label>
+                                {{ form.notes }}
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% if room %}{% url 'assets:room_assets_detail' room.id %}{% else %}{% url 'assets:room_assets_list' %}{% endif %}" 
+                                   class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Add Asset</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
