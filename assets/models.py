@@ -25,7 +25,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey(AssetCategory, on_delete=models.CASCADE)
     model = models.CharField(max_length=100, blank=True)
-    serial_number = models.CharField(max_length=100, blank=True, unique=True)
+    serial_number = models.CharField(max_length=100, blank=True, null=True, unique=True)
     purchase_date = models.DateField(default=timezone.now)
     warranty_expiry = models.DateField(null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)

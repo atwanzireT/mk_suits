@@ -186,13 +186,27 @@ def monthly_audits(request):
     current_year = timezone.now().year
     
     audits = MonthlyAudit.objects.filter(
-        audit_date__month=current_month,
-        audit_date__year=current_year
-    ).select_related('room', 'auditor')
+        audit_date__year=current_year,
+        audit_date__month=current_month
+    ).select_related('room', 'auditor').prefetch_related('audit_items')
+    
+    # Calculate statistics
+    total_audits = audits.count()
+    completed_audits = audits.filter(completed=True).count()
+    pending_audits = audits.filter(completed=False).count()
+    
+    # Calculate total assets across all audits
+    total_assets = 0
+    for audit in audits:
+        total_assets += audit.audit_items.count()
     
     context = {
         'audits': audits,
         'current_month': datetime.now().strftime('%B %Y'),
+        'total_audits': total_audits,
+        'completed_audits': completed_audits,
+        'pending_audits': pending_audits,
+        'total_assets': total_assets,
     }
     return render(request, 'assets/monthly_audits.html', context)
 
