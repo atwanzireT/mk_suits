@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Asset Management Dashboard</h1>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Assets</h5>
+                        <h2>{{ total_assets }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Need Maintenance</h5>
+                        <h2>{{ assets_needing_maintenance }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Audits</h5>
+                        <h2>{{ pending_audits }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{% url 'assets:room_assets_list' %}" class="btn btn-success">View All Room Assets</a>
+            <a href="" class="btn btn-info">Monthly Audits</a>
+        </div>
+    </div>
+{% endblock %}

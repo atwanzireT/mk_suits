@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'staff',
     'api',
     'finance',
+    'assets',
 ]
 
 
@@ -155,7 +156,7 @@ LOGOUT_REDIRECT_URL = '/user/login/'
 
 
 STATIC_URL = '/static/'
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # dev files
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static') # production files
 
